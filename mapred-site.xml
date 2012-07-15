@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<property>
+    <name>mapred.tasktracker.map.tasks.maximum</name>
+    <value>10</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>ip-10-178-67-175.us-west-1.compute.internal:8030</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker.http.address</name>
+    <value>0.0.0.0:8040</value>
+  </property>
+  <property>
+    <name>mapred.task.tracker.http.address</name>
+    <value>0.0.0.0:8050</value>
+  </property>
+  <property>
+    <name>mapreduce.jobtracker.keytab.file</name>
+    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+  </property>
+  <property>
+    <name>mapreduce.jobtracker.kerberos.principal</name>
+    <value>mapred/_HOST@HADOOP.LOCALDOMAIN</value>
+  </property>
+  <property>
+    <name>mapreduce.tasktracker.keytab.file</name>
+    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+  </property>
+  <property>
+    <name>mapreduce.tasktracker.kerberos.principal</name>
+    <value>mapred/_HOST@HADOOP.LOCALDOMAIN</value>
+  </property>
+</configuration>

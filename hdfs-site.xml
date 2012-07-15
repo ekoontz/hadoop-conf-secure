@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+    <name>dfs.block.access.token.enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dfs.namenode.keytab.file</name>
+    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+  </property>
+  <property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value>hdfs/_HOST@HADOOP.LOCALDOMAIN</value>
+  </property>
+  <property>
+    <name>dfs.https.enable</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>dfs.webhdfs.enabled</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>dfs.webhdfs.enabled</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>dfs.namenode.user.name</name>
+    <value>ec2-user</value>
+  </property>
+  <property>
+    <name>dfs.http.address</name>
+    <value>ip-10-168-174-25.us-west-1.compute.internal:8070</value>
+  </property>
+  <!-- NOTE: this is still needed even though https is not enabled. -->
+  <property>
+    <name>dfs.https.port</name>
+    <value>8090</value>
+  </property>
+<!--  <property>
+    <name>dfs.datanode.address</name>
+    <value>0.0.0.0:1004</value>
+  </property>
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:1006</value>
+  </property> -->
+  <property>
+    <name>dfs.datanode.keytab.file</name>
+    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+  </property>
+  <property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value>hdfs/_HOST@HADOOP.LOCALDOMAIN</value>
+  </property>
+  <property>
+    <name>ignore.secure.ports.for.testing</name>
+    <value>true</value>
+  </property>
+</configuration>

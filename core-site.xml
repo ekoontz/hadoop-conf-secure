@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value>kerberos</value>
+  </property>
+  <property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://ip-10-168-174-25.us-west-1.compute.internal:8020/</value>
+  </property>
+  <property>
+    <name>giraph.zkList</name>
+    <value>localhost:2181</value>
+  </property>
+
+</configuration>
