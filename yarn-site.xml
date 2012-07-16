@@ -20,23 +20,23 @@
 
   <property>
     <name>yarn.resourcemanager.scheduler.address</name>
-    <value>ip-10-168-174-25.us-west-1.compute.internal:8030</value>
+    <value>ip-10-160-151-208.us-west-1.compute.internal:8030</value>
   </property>
   <property>
     <name>yarn.resourcemanager.resource-tracker.address</name>
-    <value>ip-10-168-174-25.us-west-1.compute.internal:8031</value>
+    <value>ip-10-160-151-208.us-west-1.compute.internal:8031</value>
   </property>
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value>ip-10-168-174-25.us-west-1.compute.internal:8032</value>
+    <value>ip-10-160-151-208.us-west-1.compute.internal:8032</value>
   </property>
   <property>
     <name>yarn.resourcemanager.admin.address</name>
-    <value>ip-10-168-174-25.us-west-1.compute.internal:8033</value>
+    <value>ip-10-160-151-208.us-west-1.compute.internal:8033</value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>ip-10-168-174-25.us-west-1.compute.internal:8088</value>
+    <value>ip-10-160-151-208.us-west-1.compute.internal:8088</value>
   </property>
 
   <property>
@@ -80,10 +80,10 @@
     <value> -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 </value>
   </property>
 
-<!--  <property>
+  <property>
     <name>mapreduce.admin.map.child.java.opts</name>
     <value> -Xdebug -Xrunjdwp:transport=dt_socket,server=n,suspend=n,address=5012 </value>
-  </property> -->
+  </property>
 
 
 </configuration>
