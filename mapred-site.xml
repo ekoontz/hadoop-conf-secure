@@ -10,7 +10,7 @@
   </property>
   <property>
     <name>mapred.job.tracker</name>
-    <value>ip-10-178-67-175.us-west-1.compute.internal:8030</value>
+    <value>HOST_GOES_HERE:8030</value>
   </property>
   <property>
     <name>mapred.job.tracker.http.address</name>
