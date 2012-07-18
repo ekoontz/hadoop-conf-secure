@@ -43,7 +43,6 @@ done
 # The maximum amount of heap to use, in MB. Default is 1000.
 #export HADOOP_HEAPSIZE=
 #export HADOOP_NAMENODE_INIT_HEAPSIZE=""
-set -x
 #export HADOOP_CLIENT_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5009"
 
 # Extra Java runtime options.  Empty by default.
