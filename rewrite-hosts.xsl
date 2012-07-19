@@ -2,6 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
   <xsl:param name="hostname"/>
+  <xsl:param name="tmpdir"/>
 
   <xsl:template match="configuration">
     <xsl:copy select=".">
@@ -20,6 +21,14 @@
       <name><xsl:value-of select="name"/></name>
       <value>
 	<xsl:value-of select="$hostname"/>
+      </value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='hadoop.tmp.dir']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>
+	<xsl:value-of select="$tmpdir"/>
       </value>
     </xsl:copy>
   </xsl:template>

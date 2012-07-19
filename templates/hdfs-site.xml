@@ -5,6 +5,10 @@
 
 <configuration>
   <property>
+    <name>hadoop.tmp.dir</name>
+    <value>BIG_LOCAL_DIR</value>
+  </property>
+  <property>
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
   </property>
