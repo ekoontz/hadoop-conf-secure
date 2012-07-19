@@ -5,7 +5,7 @@ sleep 10
 kill -9 `ps -ef | grep java | grep apache | awk '{print $2}'`
 
 cd $HOME/hadoop-runtime
-rm -rf /tmp/hadoop-$USER
+rm -rf /work/hdfs-dir
 bin/hdfs namenode -format
 bin/hdfs namenode &
 bin/hdfs datanode &
