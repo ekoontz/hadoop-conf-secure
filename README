@@ -1,0 +1,13 @@
+Quick Start
+
+1. sh principals.sh
+
+2. Modify Makefile to set TMPDIR
+
+3. make install
+
+4. (optionally start screen session) 
+
+5. sh ./startup.sh
+
+

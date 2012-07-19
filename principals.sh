@@ -19,34 +19,45 @@ NORMAL_USER=`whoami`
 SERVICE_KEYTAB=services.keytab
 rm -f `pwd`/$SERVICE_KEYTAB
 
-
 #1. services
+
+#TODO: delete existing principals other than krbtgt/$REALM; otherwise
+#the KDC database will get cluttered with old X/$HOSTNAME principals if the 
+#host's hostname changes frequently (as happens with EC2 instances).
+#
+#1.0. krbtgt principal: all other principals' maxrenewlife must
+#     be less than or equal to krbtgt's maxrenewlife, so set it first.
+echo "modprinc -maxrenewlife 7days krbtgt/$REALM" | $KADMIN_LOCAL
 
 #1.1. host
 echo "delprinc -force host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB host/$HOSTNAME/@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
 #1.2. zookeeper
-echo "delprinc -force zookeeper/$HOSTNAME/@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey zookeeper/$HOSTNAME/@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB zookeeper/$HOSTNAME/@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
 #1.3. hdfs
 echo "delprinc -force hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "ktadd -k `pwd`/$SERVICE_KEYTAB hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
 #1.4. mapred
 echo "delprinc -force mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "ktadd -k `pwd`/$SERVICE_KEYTAB mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-
+echo "modprinc -maxrenewlife 7days mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
 #1.5. yarn
 echo "delprinc -force yarn/$HOSTNAME" | $KADMIN_LOCAL
 echo "addprinc -randkey yarn/$HOSTNAME" | $KADMIN_LOCAL
 echo "ktadd -k `pwd`/$SERVICE_KEYTAB yarn/$HOSTNAME" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days yarn/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
 sudo chown $NORMAL_USER `pwd`/$SERVICE_KEYTAB
 
@@ -74,8 +85,8 @@ stty echo
 
 PASSWORD=$PASSWORD1
 
-echo "delprinc -force `whoami`/@$REALM" | $KADMIN_LOCAL
-echo "addprinc -pw $PASSWORD `whoami`/@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force `whoami`@$REALM" | $KADMIN_LOCAL
+echo "addprinc -pw $PASSWORD `whoami`@$REALM" | $KADMIN_LOCAL
 
 # only uncomment this if you want to use keytabs with client (rather
 # than password).
