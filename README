@@ -6,8 +6,9 @@ Quick Start
 
 3. make install
 
-4. (optionally start screen session) 
+4. (optionally in a different terminal or screen session) make start
 
-5. sh ./startup.sh
+5. make test
+
 
 
