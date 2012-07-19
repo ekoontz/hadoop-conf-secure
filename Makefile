@@ -1,19 +1,24 @@
-.PHONY=all clean install start test
+.PHONY=all clean install start test kill
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/work/tmp
 MASTER=`hostname -f`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
+ZOOKEEPER_HOME=$(HOME)/zookeeper
 
 all: $(CONFIGS)
 
 install: clean all
 	cp $(CONFIGS) ~/hadoop-runtime/etc/hadoop
 
-start:
+kill: 
 	-kill `ps -ef | grep java | grep apache | awk '{print $2}'`
 	sleep 10
+	-kill -9 `ps -ef | grep java | grep apache | awk '{print $2}'`
+
+start: kill
+	-rm -rf /tmp/logs
 	cd $(HOME)/hadoop-runtime
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
@@ -21,7 +26,7 @@ start:
 	$(HADOOP_RUNTIME)/bin/hdfs datanode &
 	$(HADOOP_RUNTIME)/bin/yarn resourcemanager &
 	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
-	$(HADOOP_RUNTIME)/bin/zkServer.sh start-foreground 
+	$(ZOOKEEPER_HOME)/bin/zkServer.sh start-foreground 
 
 test:
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
