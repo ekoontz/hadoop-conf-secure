@@ -10,7 +10,7 @@
   </property>
   <property>
     <name>dfs.namenode.keytab.file</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
   <property>
     <name>dfs.namenode.kerberos.principal</name>
@@ -51,7 +51,7 @@
   </property> -->
   <property>
     <name>dfs.datanode.keytab.file</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
   <property>
     <name>dfs.datanode.kerberos.principal</name>

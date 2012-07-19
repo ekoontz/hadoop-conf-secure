@@ -22,7 +22,7 @@
   </property>
   <property>
     <name>mapreduce.jobtracker.keytab.file</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
   <property>
     <name>mapreduce.jobtracker.kerberos.principal</name>
@@ -30,7 +30,7 @@
   </property>
   <property>
     <name>mapreduce.tasktracker.keytab.file</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
   <property>
     <name>mapreduce.tasktracker.kerberos.principal</name>

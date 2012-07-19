@@ -15,7 +15,7 @@
 
   <property>
     <name>yarn.application.classpath</name>
-    <value>/home/ec2-user/hadoop-tm-6-runtime/etc/hadoop:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/common/*:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/common/lib/*:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/hdfs/*:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/hdfs/lib/*:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/mapreduce/*:/home/ec2-user/hadoop-tm-6-runtime/share/hadoop/mapreduce/lib/*:/home/ec2-user/giraph/target/classes</value>
+    <value>/home/ec2-user/hadoop-runtime/etc/hadoop:/home/ec2-user/hadoop-runtime/share/hadoop/common/*:/home/ec2-user/hadoop-runtime/share/hadoop/common/lib/*:/home/ec2-user/hadoop-runtime/share/hadoop/hdfs/*:/home/ec2-user/hadoop-runtime/share/hadoop/hdfs/lib/*:/home/ec2-user/hadoop-runtime/share/hadoop/mapreduce/*:/home/ec2-user/hadoop-runtime/share/hadoop/mapreduce/lib/*:/home/ec2-user/giraph/target/classes</value>
   </property>
 
   <property>
@@ -47,7 +47,7 @@
 
   <property>
     <name>yarn.resourcemanager.keytab</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
 
   <property>
@@ -57,7 +57,7 @@
 
   <property>
     <name>yarn.nodemanager.keytab</name>
-    <value>/home/ec2-user/kerb-setup/services.keytab</value>
+    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
   </property>
 
   <property>
@@ -82,11 +82,11 @@
 
   <!-- only enable for particular debugging scenarios where you've started a debuguer in server mode for the
        map.child to connect to (since it's server=n). -->
-
+<!--
   <property>
     <name>mapreduce.admin.map.child.java.opts</name>
     <value> -Xdebug -Xrunjdwp:transport=dt_socket,server=n,suspend=n,address=5012 </value>
   </property>
-
+-->
 
 </configuration>
