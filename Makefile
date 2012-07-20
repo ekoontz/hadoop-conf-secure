@@ -1,4 +1,4 @@
-.PHONY=all clean install start test kill
+.PHONY=all clean install start test kill principals
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
@@ -8,6 +8,9 @@ HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 
 all: $(CONFIGS)
+
+principals:
+	sh principals.sh
 
 install: clean all
 	cp $(CONFIGS) ~/hadoop-runtime/etc/hadoop

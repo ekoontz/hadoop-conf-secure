@@ -1,6 +1,6 @@
 Quick Start
 
-1. sh principals.sh
+1. make principals
 
 2. Modify Makefile to set TMPDIR
 
