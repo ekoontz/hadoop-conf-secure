@@ -1,8 +1,12 @@
 .PHONY=all clean install start test kill principals
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 
+# config files that only need to be copied rather than modified-by-
+# xsl-and-copied.
+OTHER_CONFIGS=log4j.properties
+
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
-TMPDIR=/work/tmp
+TMPDIR=/tmp
 MASTER=`hostname -f`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
@@ -13,7 +17,7 @@ principals:
 	sh principals.sh
 
 install: clean all
-	cp $(CONFIGS) ~/hadoop-runtime/etc/hadoop
+	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
 kill: 
 	-kill `ps -ef | grep java | grep apache | awk '{print $2}'`

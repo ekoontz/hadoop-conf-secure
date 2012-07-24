@@ -1,6 +1,18 @@
 Quick Start
 
-1. make principals
+1. make -e principals
+
+You may also do:
+
+   make principals OPT1=VAL1 .. OPTn=VALn
+
+where OPT=VAL pairs look like these examples
+ (defaults shown):
+
+   TMPDIR=/tmp
+   MASTER=`hostname -f`
+   HADOOP_RUNTIME=$(HOME)/hadoop-runtime
+   ZOOKEEPER_HOME=$(HOME)/zookeeper
 
 2. Modify Makefile to set TMPDIR
 
