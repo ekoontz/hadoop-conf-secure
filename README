@@ -1,6 +1,24 @@
 Quick Start
 
-1. make principals
+1. Set up your hadoop-runtime dir
+
+  cd 
+  git clone git://git.apache.org/hadoop-common.git
+  cd hadoop-common
+  mvn package -Pdist
+  cd
+  ls hadoop-common/hadoop-dist/target/hadoop-*
+
+There should be a directory whose name begins with hadoop that's returned 
+by this "ls". Find this suffix and use it below here:
+
+  ln -s hadoop-common/hadoop-dist/target/hadoop-$SUFFIX hadoop-runtime
+
+2. Create Kerberos Principals
+
+  Within your top-level hadoop-conf dir:
+
+  make principals
 
 You may also do:
 
@@ -14,13 +32,23 @@ where OPT=VAL pairs look like these examples
    HADOOP_RUNTIME=$(HOME)/hadoop-runtime
    ZOOKEEPER_HOME=$(HOME)/zookeeper
 
-2. Modify Makefile to set TMPDIR
+3. Install Hadoop configuration in hadoop-runtime:
 
-3. make install
+  make install
 
-4. (optionally in a different terminal or screen session) make start
+4. Start Hadoop
 
-5. make test
+(You will eventually want to run this in a screen session after
+doing it a few times).
+
+  make start
+
+
+5. Test
+
+Run a simple Map-Reduce job through the Hadoop runtime.
+
+  make test
 
 
 
