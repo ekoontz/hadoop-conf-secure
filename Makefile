@@ -6,7 +6,7 @@ CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 OTHER_CONFIGS=log4j.properties
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
-TMPDIR=/tmp
+TMPDIR=/tmp/hadoop-data
 MASTER=`hostname -f`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
