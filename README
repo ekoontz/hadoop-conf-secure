@@ -1,6 +1,6 @@
 Quick Start
 
-1. make -e principals
+1. make principals
 
 You may also do:
 
