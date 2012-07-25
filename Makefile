@@ -20,9 +20,7 @@ install: clean all
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
 kill: 
-	-kill `ps -ef | grep java | grep apache | awk '{print $2}'`
-	sleep 10
-	-kill -9 `ps -ef | grep java | grep apache | awk '{print $2}'`
+	-sh kill.sh
 
 start: kill
 	-rm -rf /tmp/logs
