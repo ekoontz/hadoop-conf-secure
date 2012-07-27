@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#TODO: just use jps rather than all of this messing with ps.
 APACHE_STUFF=`ps -ef --cols 1000 | grep java | grep "zookeeper\|hadoop" | awk '{print $2}'`
 while [ -n "$APACHE_STUFF" ]; do
 
