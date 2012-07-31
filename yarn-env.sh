@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+export HADOOP_ROOT_LOGGER="INFO,console"
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5007"
 export     YARN_NODEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5008"
 # User for YARN daemons
@@ -69,7 +70,7 @@ YARN_OPTS="$YARN_OPTS -Dhadoop.log.file=$YARN_LOGFILE"
 YARN_OPTS="$YARN_OPTS -Dyarn.log.file=$YARN_LOGFILE"
 YARN_OPTS="$YARN_OPTS -Dyarn.home.dir=$YARN_COMMON_HOME"
 YARN_OPTS="$YARN_OPTS -Dyarn.id.str=$YARN_IDENT_STRING"
-YARN_OPTS="$YARN_OPTS -Dhadoop.root.logger=${YARN_ROOT_LOGGER:-INFO,console}"
+YARN_OPTS="$YARN_OPTS -Dhadoop.root.logger=${HADOOP_ROOT_LOGGER:-INFO,console}"
 YARN_OPTS="$YARN_OPTS -Dyarn.root.logger=${YARN_ROOT_LOGGER:-INFO,console}"
 if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
   YARN_OPTS="$YARN_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
