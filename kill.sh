@@ -1,15 +1,15 @@
 #!/bin/sh
 
 #TODO: just use jps rather than all of this messing with ps.
-APACHE_STUFF=`ps -ef --cols 1000 | grep java | grep "zookeeper\|hadoop" | awk '{print $2}'`
-while [ -n "$APACHE_STUFF" ]; do
+APACHE_PIDS=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | awk '{print $1}'`
+while [ -n "$APACHE_PIDS" ]; do
 
     echo "killing apache java processes.."
-    for PID in $APACHE_STUFF
+    for PID in $APACHE_PIDS
     do
 	#TODO: works for hadoop daemons, but not zookeeper, since last arg of zookeeper command line is 
 	#configuration file not class name.
-	ROLE=`ps -e -o pid,cmd --cols 3000 | grep "^\s*$PID" | awk '{print $NF}'  `
+	ROLE=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | grep $PID | awk '{print $2}'`
 	echo "killing apache java process: $PID ($ROLE)"
 	kill $PID
     done
@@ -17,13 +17,13 @@ while [ -n "$APACHE_STUFF" ]; do
     sleep 10
 
     #terminate any stragglers
-    APACHE_STUFF=`ps -ef --cols 1000 | grep java | grep "zookeeper\|hadoop" | awk '{print $2}'`
-    for PID in $APACHE_STUFF
+    APACHE_PIDS=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | awk '{print $1}'`
+    for PID in $APACHE_PIDS
     do
-	echo "terminating apache java process: $PID"
+	echo "terminating straggler apache java process: $PID"
 	kill -9 $PID
     done
 
     sleep 3
-    APACHE_STUFF=`ps -ef --cols 1000 | grep java | grep "zookeeper\|hadoop" | awk '{print $2}'`
+    APACHE_PIDS=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | awk '{print $1}'`
 done
