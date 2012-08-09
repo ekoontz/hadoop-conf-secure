@@ -1,11 +1,17 @@
 #!/bin/sh
-REALM=HADOOP.LOCALDOMAIN
+REALM=`grep default_realm /etc/krb5.conf | awk '{print $3}'`
+
+if [ -z $REALM ]; then
+    echo "could not figure out your default Kerberos realm: check your /etc/krb5.conf file."
+    exit 1
+fi
+
 
 if [ -z $HOSTNAME ]; then
     HOSTNAME=`hostname -f`
 fi
 echo "using hostname: $HOSTNAME for instance component of"
-echo "   server principals (service/instance@REALM)."
+echo "   server principals (service/instance@$REALM)."
 
 KADMIN_LOCAL="sudo kadmin.local"
 KDC_START="sudo service krb5kdc restart"
