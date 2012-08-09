@@ -10,8 +10,8 @@ fi
 if [ -z $HOSTNAME ]; then
     HOSTNAME=`hostname -f`
 fi
-echo "using hostname: $HOSTNAME for instance component of"
-echo "   server principals (service/instance@$REALM)."
+echo "using hostname: $HOSTNAME for 'instance' component of"
+echo "   server principals (service/$HOSTNAME@$REALM)."
 
 KADMIN_LOCAL="sudo kadmin.local"
 KDC_START="sudo service krb5kdc restart"
@@ -24,7 +24,6 @@ NORMAL_USER=`whoami`
 # principles and keytabs, if any, and then (re-)creating.
 SERVICE_KEYTAB=services.keytab
 rm -f `pwd`/$SERVICE_KEYTAB
-
 #1. services
 
 #TODO: delete existing principals other than krbtgt/$REALM; otherwise
@@ -93,6 +92,7 @@ PASSWORD=$PASSWORD1
 
 echo "delprinc -force `whoami`@$REALM" | $KADMIN_LOCAL
 echo "addprinc -pw $PASSWORD `whoami`@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days `whoami`@$REALM" | $KADMIN_LOCAL
 
 # only uncomment this if you want to use keytabs with client (rather
 # than password).
