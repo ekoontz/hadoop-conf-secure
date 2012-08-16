@@ -1,6 +1,5 @@
 .PHONY=all clean install start test kill principals
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
-
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
 OTHER_CONFIGS=log4j.properties
@@ -45,12 +44,14 @@ core-site.xml: templates/core-site.xml
 
 hdfs-site.xml: templates/hdfs-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+	         --stringparam homedir `echo $$HOME` \
                  --stringparam tmpdir $(TMPDIR) rewrite-hosts.xsl $^  | xmllint --format - > $@
 
 mapred-site.xml: templates/mapred-site.xml
-	xsltproc --stringparam hostname `hostname -f` rewrite-hosts.xsl $^ | xmllint --format - > $@
+	xsltproc --stringparam hostname `hostname -f` \
+	         --stringparam homedir `echo $$HOME` rewrite-hosts.xsl $^ | xmllint --format - > $@
 
 yarn-site.xml: templates/yarn-site.xml
-	xsltproc --stringparam hostname `hostname -f` rewrite-hosts.xsl $^ | xmllint --format - > $@
-
+	xsltproc --stringparam hostname `hostname -f` \
+	         --stringparam homedir `echo $$HOME` rewrite-hosts.xsl $^ | xmllint --format - > $@
 

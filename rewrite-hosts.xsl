@@ -1,8 +1,9 @@
-<!-- convert hosts in hadoop files from one hostname to another -->
+<!-- Localize hostnames and other values in hadoop files depending on environment that we are called with. -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
   <xsl:param name="hostname"/>
   <xsl:param name="tmpdir"/>
+  <xsl:param name="homedir"/>
 
   <xsl:template match="configuration">
     <xsl:copy select=".">
@@ -86,6 +87,53 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- following might be collapsable into a single rule using the '|' xpath operator. -->
+  <xsl:template match="property[name/text()='dfs.namenode.keytab.file']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='dfs.datanode.keytab.file']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='yarn.resourcemanager.keytab']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='yarn.nodemanager.keytab']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='mapreduce.jobtracker.keytab']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='mapreduce.tasktracker.keytab']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
+
+
+  <xsl:template match="property[name/text()='hadoop.tmp.dir']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>
+	<xsl:value-of select="$tmpdir"/>
+      </value>
+    </xsl:copy>
+  </xsl:template>
 
   <xsl:template match="text()">
     <xsl:value-of select="."/>
