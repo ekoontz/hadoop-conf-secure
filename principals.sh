@@ -1,5 +1,7 @@
 #!/bin/sh
-REALM=`grep default_realm /etc/krb5.conf | awk '{print $3}'`
+if [ -z $REALM ]; then
+    REALM=`grep default_realm /etc/krb5.conf | awk '{print $3}'`
+fi
 
 if [ -z $REALM ]; then
     echo "could not figure out your default Kerberos realm: check your /etc/krb5.conf file."

@@ -4,6 +4,7 @@
   <xsl:param name="hostname"/>
   <xsl:param name="tmpdir"/>
   <xsl:param name="homedir"/>
+  <xsl:param name="realm"/>
 
   <xsl:template match="configuration">
     <xsl:copy select=".">
@@ -125,6 +126,30 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="property[name/text()='dfs.namenode.kerberos.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='dfs.datanode.kerberos.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='yarn.resourcemanager.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>yarn/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='yarn.nodemanager.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>yarn/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
 
   <xsl:template match="property[name/text()='hadoop.tmp.dir']">
     <xsl:copy select=".">

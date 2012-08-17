@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-<!-- xxxxxx values are not significant:they are simply overwritten by rewrite-hosts.xsl with the correct values. -->
 <!-- Put site-specific property overrides in this file. -->
-
 <configuration>
   <property>
     <name>hadoop.tmp.dir</name>
@@ -14,11 +12,11 @@
   </property>
   <property>
     <name>dfs.namenode.keytab.file</name>
-    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
+    <value>xxxxxx</value>
   </property>
   <property>
     <name>dfs.namenode.kerberos.principal</name>
-    <value>hdfs/_HOST@HADOOP.LOCALDOMAIN</value>
+    <value>xxxxxx</value>
   </property>
   <property>
     <name>dfs.https.enable</name>
@@ -38,7 +36,7 @@
   </property>
   <property>
     <name>dfs.http.address</name>
-    <value>HOST_GOES_HERE:8070</value>
+    <value>xxxxxx:8070</value>
   </property>
   <!-- NOTE: this is still needed even though https is not enabled. -->
   <property>
@@ -55,11 +53,11 @@
   </property> -->
   <property>
     <name>dfs.datanode.keytab.file</name>
-    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
+    <value>xxxxxx</value>
   </property>
   <property>
     <name>dfs.datanode.kerberos.principal</name>
-    <value>hdfs/_HOST@HADOOP.LOCALDOMAIN</value>
+    <value>xxxxxx</value>
   </property>
   <property>
     <name>ignore.secure.ports.for.testing</name>

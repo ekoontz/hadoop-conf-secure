@@ -45,6 +45,7 @@ core-site.xml: templates/core-site.xml
 hdfs-site.xml: templates/hdfs-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
 	         --stringparam homedir `echo $$HOME` \
+	         --stringparam realm `echo $$REALM` \
                  --stringparam tmpdir $(TMPDIR) rewrite-hosts.xsl $^  | xmllint --format - > $@
 
 mapred-site.xml: templates/mapred-site.xml
