@@ -1,6 +1,9 @@
 #!/bin/sh
 if [ -z $REALM ]; then
-    REALM=`grep default_realm /etc/krb5.conf | awk '{print $3}'`
+    if [ -z $KRB5_CONFIG ]; then
+	KRB5_CONFIG=/etc/krb5.conf
+    fi
+    REALM=`grep default_realm $KRB5_CONFIG | awk '{print $3}'`
 fi
 
 if [ -z $REALM ]; then
