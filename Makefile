@@ -54,5 +54,6 @@ mapred-site.xml: templates/mapred-site.xml
 
 yarn-site.xml: templates/yarn-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+	         --stringparam realm `echo $$REALM` \
 	         --stringparam homedir `echo $$HOME` rewrite-hosts.xsl $^ | xmllint --format - > $@
 
