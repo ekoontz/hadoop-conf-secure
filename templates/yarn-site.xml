@@ -78,16 +78,22 @@
 
   <property>
     <name>yarn.app.mapreduce.am.command-opts</name>
-    <value> -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 -Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA </value>
+    <value>xxxxxx</value>
   </property>
 
-  <!-- only enable for particular debugging scenarios where you've started a debuguer in server mode for the
-       map.child to connect to (since it's server=n). -->
-<!--
   <property>
     <name>mapreduce.admin.map.child.java.opts</name>
-    <value> -Xdebug -Xrunjdwp:transport=dt_socket,server=n,suspend=n,address=5012 </value>
+    <value>xxxxxx</value>
   </property>
--->
+
+  <property>
+    <name>mapreduce.map.java.opts</name>
+    <value>xxxxxx</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.java.opts</name>
+    <value>xxxxxx</value>
+  </property>
+
 
 </configuration>

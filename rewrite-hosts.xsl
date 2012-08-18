@@ -174,6 +174,34 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="property[name/text()='yarn.app.mapreduce.am.command-opts']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 -Dfoo=44 -Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="property[name/text()='mapreduce.admin.map.child.java.opts']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="property[name/text()='mapreduce.reduce.java.opts']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="property[name/text()='mapreduce.map.java.opts']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="text()">
     <xsl:value-of select="."/>
   </xsl:template>

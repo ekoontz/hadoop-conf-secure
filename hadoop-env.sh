@@ -46,7 +46,10 @@ done
 #export HADOOP_CLIENT_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5009"
 
 # Extra Java runtime options.  Empty by default.
+#old:
 export HADOOP_OPTS="-Djava.net.preferIPv4Stack=true $HADOOP_CLIENT_OPTS"
+#new:
+export HADOOP_OPTS="-Djava.net.preferIPv4Stack=true -DinsideHadoopEnv=true -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun $HADOOP_CLIENT_OPTS"
 
 export HADOOP_NAMENODE_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
 export HADOOP_DATANODE_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006"
