@@ -16,7 +16,7 @@
 
   <property>
     <name>yarn.application.classpath</name>
-    <value>/home/ec2-user/hadoop-runtime/etc/hadoop:/home/ec2-user/hadoop-runtime/share/hadoop/common/*:/home/ec2-user/hadoop-runtime/share/hadoop/common/lib/*:/home/ec2-user/hadoop-runtime/share/hadoop/hdfs/*:/home/ec2-user/hadoop-runtime/share/hadoop/hdfs/lib/*:/home/ec2-user/hadoop-runtime/share/hadoop/mapreduce/*:/home/ec2-user/hadoop-runtime/share/hadoop/mapreduce/lib/*:/home/ec2-user/giraph/target/classes</value>
+    <value>******</value>
   </property>
 
   <property>

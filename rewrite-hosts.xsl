@@ -160,6 +160,20 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="property[name/text()='yarn.application.classpath']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-runtime/etc/hadoop:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/lib/*:<xsl:value-of select="$homedir"/>/giraph/target/classes:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/yarn/*</value>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="property[name/text()='yarn.nodemanager.admin-env']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>MALLOC_ARENA_MAX=$MALLOC_ARENA_MAX, JAVA_LIBRARY_PATH=$JAVA_LIBRARY_PATH, LD_LIBRARY_PATH=$JAVA_LIBRARY_PATH, FOO=42, KRB5_CONFIG=/Users/ekoontz/pig/krb5.conf</value>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="text()">
     <xsl:value-of select="."/>
   </xsl:template>
