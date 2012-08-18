@@ -63,7 +63,7 @@ fi
 # restore ordinary behaviour
 unset IFS
 
-
+YARN_OPTS="-Djava.net.preferIPv4Stack=true -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun"
 YARN_OPTS="$YARN_OPTS -Dhadoop.log.dir=$YARN_LOG_DIR"
 YARN_OPTS="$YARN_OPTS -Dyarn.log.dir=$YARN_LOG_DIR"
 YARN_OPTS="$YARN_OPTS -Dhadoop.log.file=$YARN_LOGFILE"
