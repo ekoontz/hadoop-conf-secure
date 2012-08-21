@@ -36,4 +36,14 @@
     <name>mapreduce.tasktracker.kerberos.principal</name>
     <value>mapred/_HOST@HADOOP.LOCALDOMAIN</value>
   </property>
+  <property>
+    <name>mapreduce.jobhistory.kerberos.principal</name>
+    <value>(filled in by rewrite-hosts.xsl)</value>
+  </property>
+  <property>
+    <name>mapreduce.jobhistory.keytab</name>
+    <value>(filled in by rewrite-hosts.xsl)</value>
+  </property>
+
+
 </configuration>

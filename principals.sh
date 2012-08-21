@@ -63,6 +63,13 @@ echo "addprinc -randkey mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "ktadd -k `pwd`/$SERVICE_KEYTAB mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
 
+#1.4.5 historymanager
+echo "delprinc -force jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+
+
 #1.5. yarn
 echo "delprinc -force yarn/$HOSTNAME" | $KADMIN_LOCAL
 echo "addprinc -randkey yarn/$HOSTNAME" | $KADMIN_LOCAL
