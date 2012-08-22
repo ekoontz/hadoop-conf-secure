@@ -2,7 +2,7 @@
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
-OTHER_CONFIGS=log4j.properties
+OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/tmp/hadoop-data
@@ -26,8 +26,11 @@ envquiet:
 principals:
 	sh principals.sh
 
-install: clean all
+install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
+
+~/hadoop-runtime:
+	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
 
 kill: 
 	-sh kill.sh
