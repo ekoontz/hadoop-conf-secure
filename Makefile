@@ -60,7 +60,7 @@ debug:
 
 test:
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
-         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.1.tm6.jar pi 5 5
+         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
 clean:
 	-rm $(CONFIGS)
