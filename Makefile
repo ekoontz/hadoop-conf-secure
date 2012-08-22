@@ -1,4 +1,4 @@
-.PHONY=all clean install start test kill principals printenv envquiet
+.PHONY=all clean install start test test-hdfs test-mapreduce kill principals printenv envquiet
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
@@ -58,7 +58,12 @@ debug:
 	echo "REALM:          " $(REALM)
 	echo "HADOOP_RUNTIME: " $(HADOOP_RUNTIME)
 
-test:
+test: hdfs-test mapreduce-test
+
+hdfs-test: permissions
+	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://`hostname -f`:8020/
+
+mapreduce-test: 
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
