@@ -163,7 +163,7 @@
   <xsl:template match="property[name/text()='yarn.application.classpath']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value><xsl:value-of select="$homedir"/>/hadoop-runtime/etc/hadoop:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/lib/*:<xsl:value-of select="$homedir"/>/giraph/target/classes:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/yarn/*</value>
+      <value><xsl:value-of select="$homedir"/>/hadoop-runtime/etc/hadoop:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/common/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/hdfs/lib/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/*:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/mapreduce/lib/*:<xsl:value-of select="$homedir"/>/giraph/target/classes:<xsl:value-of select="$homedir"/>/hadoop-runtime/share/hadoop/yarn/*:<xsl:value-of select="$homedir"/>/.m2/repository/org/json/json/20090211/json-20090211.jar:<xsl:value-of select="$homedir"/>/.m2/repository/org/json/json/20090211/json-20090211.jar:/Users/ekoontz/.m2/repository/net/iharder/base64/2.3.8/base64-2.3.8.jar:</value>
     </xsl:copy>
   </xsl:template>
 
