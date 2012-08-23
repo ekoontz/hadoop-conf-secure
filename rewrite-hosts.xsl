@@ -170,35 +170,35 @@
   <xsl:template match="property[name/text()='yarn.nodemanager.admin-env']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value>MALLOC_ARENA_MAX=$MALLOC_ARENA_MAX, JAVA_LIBRARY_PATH=$JAVA_LIBRARY_PATH, LD_LIBRARY_PATH=$JAVA_LIBRARY_PATH, FOO=42, KRB5_CONFIG=/Users/ekoontz/pig/krb5.conf</value>
+      <value>MALLOC_ARENA_MAX=$MALLOC_ARENA_MAX, JAVA_LIBRARY_PATH=$JAVA_LIBRARY_PATH, LD_LIBRARY_PATH=$JAVA_LIBRARY_PATH, FOO=42, KRB5_CONFIG=<xsl:value-of select="$homedir"/>/hadoop-conf/krb5.conf</value>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="property[name/text()='yarn.app.mapreduce.am.command-opts']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 -Dfoo=44 -Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+      <value>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 -Dfoo=44 -Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Djava.security.krb5.conf=<xsl:value-of select="$homedir"/>/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="property[name/text()='mapreduce.admin.map.child.java.opts']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=<xsl:value-of select="$homedir"/>/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="property[name/text()='mapreduce.reduce.java.opts']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=<xsl:value-of select="$homedir"/>/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="property[name/text()='mapreduce.map.java.opts']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
-      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+      <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=<xsl:value-of select="$homedir"/>/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
     </xsl:copy>
   </xsl:template>
 
