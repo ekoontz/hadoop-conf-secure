@@ -1,4 +1,4 @@
-.PHONY=all clean install start test kill principals printenv envquiet
+.PHONY=all clean install start test kill principals printenv envquiet wtf
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
@@ -14,7 +14,7 @@ KADMIN_LOCAL="ssh 172.16.153.3 'sudo kadmin.local'"
 all: $(CONFIGS)
 
 printenv:
-	make -s envquiet
+	make -s -e envquiet
 
 envquiet:
 	echo "Hadoop Runtime directory:     $(HADOOP_RUNTIME)"
@@ -24,7 +24,7 @@ envquiet:
 	echo "Realm name:                   $(REALM)"
 
 principals:
-	sh principals.sh
+	export MASTER=$(MASTER); sh principals.sh $(MASTER)
 
 install: clean all
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
@@ -58,6 +58,9 @@ debug:
 test:
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.1.tm6.jar pi 5 5
+
+wtf:
+	echo $(MASTER)
 
 clean:
 	-rm $(CONFIGS)
