@@ -15,7 +15,7 @@ KADMIN_LOCAL="ssh 172.16.153.3 'sudo kadmin.local'"
 all: $(CONFIGS)
 
 printenv:
-	make -s envquiet
+	make -s -e envquiet
 
 envquiet:
 	echo "Hadoop Runtime directory:     $(HADOOP_RUNTIME)"
@@ -25,7 +25,7 @@ envquiet:
 	echo "Realm name:                   $(REALM)"
 
 principals:
-	export KRB5_CONF=$(KRB5_CONF); sh principals.sh
+	export KRB5_CONF=$(KRB5_CONF); export MASTER=$(MASTER); sh principals.sh
 
 install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop

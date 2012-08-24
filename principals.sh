@@ -11,12 +11,15 @@ if [ -z $REALM ]; then
     exit 1
 fi
 
-
-if [ -z $HOSTNAME ]; then
-    HOSTNAME=`hostname -f`
+if [ -z $INSTANCE ]; then
+    INSTANCE=$*
 fi
-echo "using hostname: $HOSTNAME for 'instance' component of"
-echo "   server principals (service/$HOSTNAME@$REALM)."
+
+if [ -z $INSTANCE ]; then
+    INSTANCE=`hostname -f`
+fi
+echo "using hostname: $INSTANCE for 'instance' component of"
+echo "   server principals (service/$INSTANCE@$REALM)."
 
 KADMIN_LOCAL="sudo kadmin.local"
 KDC_START="sudo service krb5kdc restart"
@@ -32,7 +35,7 @@ rm -f `pwd`/$SERVICE_KEYTAB
 #1. services
 
 #TODO: delete existing principals other than krbtgt/$REALM; otherwise
-#the KDC database will get cluttered with old X/$HOSTNAME principals if the 
+#the KDC database will get cluttered with old X/$INSTANCE principals if the 
 #host's hostname changes frequently (as happens with EC2 instances).
 #
 #1.0. krbtgt principal: all other principals' maxrenewlife must
@@ -40,41 +43,41 @@ rm -f `pwd`/$SERVICE_KEYTAB
 echo "modprinc -maxrenewlife 7days krbtgt/$REALM" | $KADMIN_LOCAL
 
 #1.1. host
-echo "delprinc -force host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days host/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force host/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey host/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB host/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days host/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.2. zookeeper
-echo "delprinc -force zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days zookeeper/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.3. hdfs
-echo "delprinc -force hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days hdfs/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.4. mapred
-echo "delprinc -force mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days mapred/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.4.5 historymanager
-echo "delprinc -force jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "addprinc -randkey jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days jt/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 
 #1.5. yarn
-echo "delprinc -force yarn/$HOSTNAME" | $KADMIN_LOCAL
-echo "addprinc -randkey yarn/$HOSTNAME" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB yarn/$HOSTNAME" | $KADMIN_LOCAL
-echo "modprinc -maxrenewlife 7days yarn/$HOSTNAME@$REALM" | $KADMIN_LOCAL
+echo "delprinc -force yarn/$INSTANCE" | $KADMIN_LOCAL
+echo "addprinc -randkey yarn/$INSTANCE" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB yarn/$INSTANCE" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days yarn/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 sudo chown $NORMAL_USER `pwd`/$SERVICE_KEYTAB
 
@@ -121,10 +124,12 @@ echo "modprinc -maxrenewlife 7days `whoami`@$REALM" | $KADMIN_LOCAL
 # tickets, which we do next).
 $KDC_START
 
+echo
 echo "Now we will obtain a ticket-granting ticket and put it in your ticket cache. You should be asked for a password. Type the password you just chose in the last step."
 kinit
 if [ $? = '0' ]; then
-    echo -n "Obtained and cached ticket successfully. Now attempting to renew your ticket.."
+    echo     "Obtained and cached ticket successfully."
+    echo -n  "Now attempting to renew your ticket.."
     kinit -R
     if [ $? = '0' ]; then
 	echo "ok."
