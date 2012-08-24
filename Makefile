@@ -1,8 +1,8 @@
-.PHONY=all clean install start test kill principals printenv envquiet wtf
+.PHONY=all clean install start test test-hdfs test-mapreduce kill principals printenv envquiet
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
-OTHER_CONFIGS=log4j.properties
+OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/tmp/hadoop-data
@@ -26,8 +26,11 @@ envquiet:
 principals:
 	export MASTER=$(MASTER); sh principals.sh $(MASTER)
 
-install: clean all
+install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
+
+~/hadoop-runtime:
+	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
 
 kill: 
 	-sh kill.sh
@@ -55,12 +58,14 @@ debug:
 	echo "REALM:          " $(REALM)
 	echo "HADOOP_RUNTIME: " $(HADOOP_RUNTIME)
 
-test:
-	$(HADOOP_RUNTIME)/bin/hadoop jar \
-         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.1.tm6.jar pi 5 5
+test: hdfs-test mapreduce-test
 
-wtf:
-	echo $(MASTER)
+hdfs-test: permissions
+	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://`hostname -f`:8020/
+
+mapreduce-test: 
+	$(HADOOP_RUNTIME)/bin/hadoop jar \
+         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
 clean:
 	-rm $(CONFIGS)
