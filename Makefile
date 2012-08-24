@@ -1,4 +1,4 @@
-.PHONY=all clean install start test test-hdfs test-mapreduce kill principals printenv envquiet
+.PHONY=all clean install start test test-hdfs test-mapreduce kill principals printenv envquiet normaluser hdfsuser
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
@@ -10,6 +10,7 @@ MASTER=`hostname -f | tr "[:upper:]" "[:lower:]"`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
+KRB5_CONF=./krb5.conf
 KADMIN_LOCAL="ssh 172.16.153.3 'sudo kadmin.local'"
 all: $(CONFIGS)
 
@@ -24,7 +25,7 @@ envquiet:
 	echo "Realm name:                   $(REALM)"
 
 principals:
-	sh principals.sh
+	export KRB5_CONF=$(KRB5_CONF); sh principals.sh
 
 install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
@@ -46,10 +47,30 @@ start: kill
 	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
 	$(ZOOKEEPER_HOME)/bin/zkServer.sh start-foreground 
 
-# modify HDFS permissions so that normal user can run jobs.
-permissions:
-	kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
+
+# use password authentication.
+normaluser:
+	kdestroy
+	export KRB5_CONF=$(KRB5_CONF); kinit `whoami`@$(REALM)
+
+# use keytab authentication.
+hdfsuser:
+	kdestroy
+	export KRB5_CONF=$(KRB5_CONF); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
+
+# this modifies HDFS permissions so that normal user can run jobs.
+permissions: hdfsuser
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
+	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
 	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
+
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/user
+	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/user
+
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp/yarn
+	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp/yarn
+	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp/yarn
+
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(MASTER):8020/
 
 #print some diagnostics
@@ -60,10 +81,10 @@ debug:
 
 test: hdfs-test mapreduce-test
 
-hdfs-test: permissions
-	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://`hostname -f`:8020/
+hdfs-test: permissions normaluser
+	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
 
-mapreduce-test: 
+mapreduce-test: normaluser
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
