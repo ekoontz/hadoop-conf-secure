@@ -10,7 +10,7 @@ MASTER=`hostname -f | tr "[:upper:]" "[:lower:]"`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
-KRB5_CONF=./krb5.conf
+KRB5_CONFIG=./krb5.conf
 KADMIN_LOCAL="ssh 172.16.153.3 'sudo kadmin.local'"
 all: $(CONFIGS)
 
@@ -25,7 +25,7 @@ envquiet:
 	echo "Realm name:                   $(REALM)"
 
 principals:
-	export KRB5_CONF=$(KRB5_CONF); export MASTER=$(MASTER); sh principals.sh
+	export KRB5_CONFIG=$(KRB5_CONFIG); export MASTER=$(MASTER); sh principals.sh
 
 install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
@@ -50,13 +50,13 @@ start: kill
 
 # use password authentication.
 normaluser:
-	kdestroy
-	export KRB5_CONF=$(KRB5_CONF); kinit `whoami`@$(REALM)
+	-kdestroy
+	export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM)
 
 # use keytab authentication.
 hdfsuser:
-	kdestroy
-	export KRB5_CONF=$(KRB5_CONF); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
+	-kdestroy
+	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
 
 # this modifies HDFS permissions so that normal user can run jobs.
 permissions: hdfsuser
