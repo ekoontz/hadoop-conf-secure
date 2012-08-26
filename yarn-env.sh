@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# separate multiple DNS servers with commas (,)
+export DNS_SERVERS=172.16.175.3
 export HADOOP_ROOT_LOGGER="INFO,console"
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5007"
 export     YARN_NODEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5008"
@@ -63,7 +65,7 @@ fi
 # restore ordinary behaviour
 unset IFS
 
-YARN_OPTS="-Djava.net.preferIPv4Stack=true -Djava.security.krb5.conf=/Users/ekoontz/pig/krb5.conf -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun"
+YARN_OPTS="-Djava.net.preferIPv4Stack=true -Djava.security.krb5.conf=$HOME/hadoop-conf/krb5.conf -Dsun.net.spi.nameservice.nameservers=$DNS_SERVERS -Dsun.net.spi.nameservice.provider.1=dns,sun"
 YARN_OPTS="$YARN_OPTS -Dhadoop.log.dir=$YARN_LOG_DIR"
 YARN_OPTS="$YARN_OPTS -Dyarn.log.dir=$YARN_LOG_DIR"
 YARN_OPTS="$YARN_OPTS -Dhadoop.log.file=$YARN_LOGFILE"
