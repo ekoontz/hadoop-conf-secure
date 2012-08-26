@@ -20,9 +20,9 @@ done on your host computer or your guest VM, respectively.
 
 VMWare, Virtual Box, or another virtualization product should
 work. You should set up the VM so that the guest OS has access to two
-networks. The first, will be a bridged network that allows the guest
+networks. One will be a bridged network that allows the guest
 OS to connect to the Internet so that it can install packages and
-updates. The second is a host-only network on a private range
+updates. The other is a host-only network on a private range
 (e.g. 175.16.172.0/8).
 
 2. Set up your hadoop-runtime dir (host)
@@ -109,9 +109,7 @@ Add the following as the file /var/named/local.ptr.db:
 
   [ekoontz@centos1 ~]$ cat /etc/ntp.conf | grep server
 
-  # Use public servers from the pool.ntp.org project.
   server 172.16.175.1
-
 
 8. Start services on guest VM (guest)
 
