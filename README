@@ -13,6 +13,9 @@ time and date) when you awaken your computer from sleep.
 
 Quick Start
 
+Below, I use "(host)" and "(guest)" to clarify which action should be
+done on your host computer or your guest VM, respectively.
+
 1. Set up a VM with Linux with a host-only network. 
 
 VMWare, Virtual Box, or another virtualization product should
@@ -22,7 +25,7 @@ OS to connect to the Internet so that it can install packages and
 updates. The second is a host-only network on a private range
 (e.g. 175.16.172.0/8).
 
-2. Set up your hadoop-runtime dir
+2. Set up your hadoop-runtime dir (host)
 
   cd 
   git clone git://git.apache.org/hadoop-common.git
@@ -36,7 +39,9 @@ by this "ls". Find this suffix and use it below here:
 
   ln -s hadoop-common/hadoop-dist/target/hadoop-$SUFFIX hadoop-runtime
 
-3. Create Kerberos Principals
+3. Create Kerberos Principals (guest)
+
+  Git clone hadoop-conf on your guest VM.
 
   Within your top-level hadoop-conf dir:
 
@@ -54,7 +59,7 @@ where OPT=VAL pairs look like these examples
    HADOOP_RUNTIME=$(HOME)/hadoop-runtime
    ZOOKEEPER_HOME=$(HOME)/zookeeper
 
-4. On host computer, make sure ntpd is running:
+4. On host computer, make sure ntpd is running (host)
 
   Eugenes-MacBook-Pro:hadoop-conf ekoontz$ ps -ef | grep ntpd
     0 81521     1   0  3:05PM ??         0:01.03 /usr/sbin/ntpd -c /private/etc/ntp-restrict.conf -n -g -p /var/run/ntpd.pid -f /var/db/ntp.drift
@@ -63,12 +68,11 @@ The guest VM should be able to connect to the host computer's ntpd so
 that the guest can keep its time in sync with the host, which is
 important for Kerberos tickets to work correctly. See also step 7 below for ntp configuration on the guest VM.
 
-5. On guest VM, install and start bind, krb5kdc, and ntpdate:
+5. On guest VM, install and start bind, krb5kdc, and ntpdate (guest)
 
   [root@centos1]# yum -y install krb5-server bind ntpdate
 
-
-6. Configure named on guest VM:
+6. Configure named on guest VM (guest)
 
 Add the following at the bottom of /etc/named.conf:
 
@@ -101,7 +105,7 @@ Add the following as the file /var/named/local.ptr.db:
   1			IN PTR	eugenes-macbook-pro.local.
   3    			IN PTR	centos.local.
 
-7. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network:
+7. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network (guest)
 
   [ekoontz@centos1 ~]$ cat /etc/ntp.conf | grep server
 
@@ -109,13 +113,13 @@ Add the following as the file /var/named/local.ptr.db:
   server 172.16.175.1
 
 
-8. Start services on guest VM:
+8. Start services on guest VM (guest)
 
   [root@centos1]# chkconfig krb5kdc on
   [root@centos1]# chkconfig bind on
   [root@centos1]# chkconfig ntpdate on
 
-9. On guest VM, make sure bind, krb5kdc are running:
+9. On guest VM, make sure bind, krb5kdc are running (guest)
 
    [ekoontz@centos1 ~]$ ps -ef | grep krb5kdc
 root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/krb5kdc.pid
@@ -123,11 +127,11 @@ root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/kr
   [ekoontz@centos1 ~]$ ps -ef | grep bind
   nobody    2815     1  0 11:39 ?        00:00:00 /usr/sbin/dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
 
-10. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network:
+10. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network (host)
 
   export DNS_SERVERS=172.16.175.3
 
-11. Edit krb5.conf: set kdc and admin_server to IP of VM on host-only network:
+11. Edit $HOME/hadoop-conf/krb5.conf: set kdc and admin_server to IP of VM on host-only network (host)
 
   [realms]
    EXAMPLE.COM = {
@@ -137,11 +141,11 @@ root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/kr
     admin_server = 172.16.175.3
    }
 
-12. Install Hadoop configuration in hadoop-runtime:
+12. Install Hadoop configuration in hadoop-runtime (host)
 
   make install
 
-13. Sync guest clock:
+13. Sync guest clock (guest)
 
   [root@centos1]# sudo service ntpdate restart; date
 
@@ -151,14 +155,14 @@ built-in battery-powered clock, but the guest VM must be synced
 manually via the above step. (Perhaps there's a way to have it
 automatically sync periodically but I am not aware of it).
 
-13. Start Hadoop
+13. Start Hadoop (host)
 
 (You will eventually want to run this in a screen session after
 doing it a few times).
 
   make start
 
-14. Test
+14. Test (host)
 
 Run a simple Map-Reduce job through the Hadoop runtime.
 
