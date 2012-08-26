@@ -1,6 +1,28 @@
+Introduction
+
+This is intended to get a secure Hadoop installed in a purely-local
+configuration on your computer for development purposes. It allows you
+to work with secure Hadoop even when your computer is not connected to
+the Internet.  It requires that you install a virtual machine running
+Linux to provide a DNS server (named) and a Kerberos Key Distribution
+Center. The host computer provides the virtualization environment as
+well as serving as an NTP (network time protocol) server. This latter
+service allows your VM to sync itself to the correct (host-determined
+time and date) when you awaken your computer from sleep.  
+
+
 Quick Start
 
-1. Set up your hadoop-runtime dir
+1. Set up a VM with Linux with a host-only network. 
+
+VMWare, Virtual Box, or another virtualization product should
+work. You should set up the VM so that the guest OS has access to two
+networks. The first, will be a bridged network that allows the guest
+OS to connect to the Internet so that it can install packages and
+updates. The second is a host-only network on a private range
+(e.g. 175.16.172.0/8).
+
+2. Set up your hadoop-runtime dir
 
   cd 
   git clone git://git.apache.org/hadoop-common.git
@@ -14,7 +36,7 @@ by this "ls". Find this suffix and use it below here:
 
   ln -s hadoop-common/hadoop-dist/target/hadoop-$SUFFIX hadoop-runtime
 
-2. Create Kerberos Principals
+3. Create Kerberos Principals
 
   Within your top-level hadoop-conf dir:
 
@@ -32,23 +54,112 @@ where OPT=VAL pairs look like these examples
    HADOOP_RUNTIME=$(HOME)/hadoop-runtime
    ZOOKEEPER_HOME=$(HOME)/zookeeper
 
-3. Install Hadoop configuration in hadoop-runtime:
+4. On host computer, make sure ntpd is running:
+
+  Eugenes-MacBook-Pro:hadoop-conf ekoontz$ ps -ef | grep ntpd
+    0 81521     1   0  3:05PM ??         0:01.03 /usr/sbin/ntpd -c /private/etc/ntp-restrict.conf -n -g -p /var/run/ntpd.pid -f /var/db/ntp.drift
+
+The guest VM should be able to connect to the host computer's ntpd so
+that the guest can keep its time in sync with the host, which is
+important for Kerberos tickets to work correctly. See also step 7 below for ntp configuration on the guest VM.
+
+5. On guest VM, install and start bind, krb5kdc, and ntpdate:
+
+  [root@centos1]# yum -y install krb5-server bind ntpdate
+
+
+6. Configure named on guest VM:
+
+Add the following at the bottom of /etc/named.conf:
+
+  zone "local" {
+       type master;
+       file "local.db";
+  };
+  zone "175.16.172.in-addr.arpa" {
+       type master;
+       file "local.ptr.db";
+  };
+
+Add the following as the file /var/named/local.db:
+*note that I use 172.16.175.1 and 172.16.175.3 as the hostnames of the host computer and the guest VM, respectively, on the host-only network; substitute your own values*.
+
+  $TTL 1H
+  @    SOA LOCALHOST. foobar (1 1h 15m 30d 2h)
+       NS LOCALHOST.
+  eugenes-macbook-pro  A	172.16.175.1
+  centos		     A	172.16.175.3
+
+
+Add the following as the file /var/named/local.ptr.db:
+*175.16.172 should be substituted for your host-only network most-significant bytes, reversed. So if your host-only network was on 1.2.3.x, you'd use 3.2.1.in-addr.arpa below*
+
+  $TTL 1H
+  $ORIGIN 175.16.172.in-addr.arpa.
+  @    SOA LOCALHOST. foobar (1 1h 15m 30d 2h)
+       NS LOCALHOST.
+  1			IN PTR	eugenes-macbook-pro.local.
+  3    			IN PTR	centos.local.
+
+7. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network:
+
+  [ekoontz@centos1 ~]$ cat /etc/ntp.conf | grep server
+
+  # Use public servers from the pool.ntp.org project.
+  server 172.16.175.1
+
+
+8. Start services on guest VM:
+
+  [root@centos1]# chkconfig krb5kdc on
+  [root@centos1]# chkconfig bind on
+  [root@centos1]# chkconfig ntpdate on
+
+9. On guest VM, make sure bind, krb5kdc are running:
+
+   [ekoontz@centos1 ~]$ ps -ef | grep krb5kdc
+root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/krb5kdc.pid
+
+  [ekoontz@centos1 ~]$ ps -ef | grep bind
+  nobody    2815     1  0 11:39 ?        00:00:00 /usr/sbin/dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
+
+10. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network:
+
+  export DNS_SERVERS=172.16.175.3
+
+11. Edit krb5.conf: set kdc and admin_server to IP of VM on host-only network:
+
+  [realms]
+   EXAMPLE.COM = {
+    #change to ip or hostname of your kdc
+    kdc = 172.16.175.3
+    #change to ip or hostname of your admin_server
+    admin_server = 172.16.175.3
+   }
+
+12. Install Hadoop configuration in hadoop-runtime:
 
   make install
 
-4. Start Hadoop
+13. Sync guest clock:
+
+  [root@centos1]# sudo service ntpdate restart; date
+
+You will need to do this every time your host computer is put to
+sleep. Your host computer will sync its time automatically using its
+built-in battery-powered clock, but the guest VM must be synced
+manually via the above step. (Perhaps there's a way to have it
+automatically sync periodically but I am not aware of it).
+
+13. Start Hadoop
 
 (You will eventually want to run this in a screen session after
 doing it a few times).
 
   make start
 
-
-5. Test
+14. Test
 
 Run a simple Map-Reduce job through the Hadoop runtime.
 
   make test
-
-
-
