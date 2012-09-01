@@ -153,14 +153,14 @@ built-in battery-powered clock, but the guest VM must be synced
 manually via the above step. (Perhaps there's a way to have it
 automatically sync periodically but I am not aware of it).
 
-13. Start Hadoop (host)
+14. Start Hadoop (host)
 
 (You will eventually want to run this in a screen session after
 doing it a few times).
 
   make start
 
-14. Test (host)
+15. Test (host)
 
 Run a simple Map-Reduce job through the Hadoop runtime.
 
