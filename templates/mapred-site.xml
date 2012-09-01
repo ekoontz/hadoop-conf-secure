@@ -22,28 +22,27 @@
   </property>
   <property>
     <name>mapreduce.jobtracker.keytab.file</name>
-    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
+    <value><!-- rewritten --></value>
   </property>
   <property>
     <name>mapreduce.jobtracker.kerberos.principal</name>
-    <value>mapred/_HOST@HADOOP.LOCALDOMAIN</value>
+    <value><!-- rewritten --></value>
   </property>
   <property>
     <name>mapreduce.tasktracker.keytab.file</name>
-    <value>/home/ec2-user/hadoop-conf/services.keytab</value>
+    <value><!-- rewritten --></value>
   </property>
   <property>
     <name>mapreduce.tasktracker.kerberos.principal</name>
-    <value>mapred/_HOST@HADOOP.LOCALDOMAIN</value>
+    <value><!-- rewritten --></value>
   </property>
   <property>
     <name>mapreduce.jobhistory.kerberos.principal</name>
-    <value>(filled in by rewrite-hosts.xsl)</value>
+    <value><!-- rewritten --></value>
   </property>
   <property>
     <name>mapreduce.jobhistory.keytab</name>
-    <value>(filled in by rewrite-hosts.xsl)</value>
+    <value><!-- rewritten --></value>
   </property>
-
 
 </configuration>
