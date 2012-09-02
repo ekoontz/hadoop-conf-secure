@@ -167,9 +167,11 @@ And reverse-resolvable:
 
 You will need to do this every time your host computer is put to
 sleep. Your host computer will sync its time automatically using its
-built-in battery-powered clock, but the guest VM must be synced
-manually via the above step. (Perhaps there's a way to have it
-automatically sync periodically but I am not aware of it).
+built-in battery-powered clock (and using an external NTP server if
+configured to do so and if it's connected to the Internet), but the
+guest VM must be synced manually via the above step. (Perhaps there's
+a way to have it automatically sync periodically but I am not aware of
+it).
 
 15. Start Hadoop (host)
 
