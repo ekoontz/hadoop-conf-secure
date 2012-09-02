@@ -1,15 +1,20 @@
 Introduction
 
-This is intended to get a secure Hadoop installed in a purely-local
-configuration on your computer for development purposes. It allows you
-to work with secure Hadoop even when your computer is not connected to
-the Internet.  It requires that you install a virtual machine running
-Linux to provide a DNS server (named) and a Kerberos Key Distribution
-Center. The host computer provides the virtualization environment as
-well as serving as an NTP (network time protocol) server. This latter
-service allows your VM to sync itself to the correct (host-determined
-time and date) when you awaken your computer from sleep.  
+This is intended to get a secure 2.0-era Hadoop installed, from
+source, in a purely-local configuration on your computer for
+development purposes. It allows you to work with secure Hadoop even
+when your computer is not connected to the Internet.  It requires that
+you install a virtual machine running Linux to provide a DNS server
+(named) and a Kerberos Key Distribution Center. The host computer
+provides the virtualization environment, runs a NTP (network time
+protocol) server. The latter service allows your VM to sync itself to
+the correct (host-determined time and date) when you awaken your
+computer from sleep. Finally, the host computer also runs the actual
+Hadoop daemons.
 
+For more information on compiling and running Hadoop, please also see:
+
+http://ekoontz.github.com/hadoop/2012/02/27/hadoop-from-source/
 
 Quick Start
 
