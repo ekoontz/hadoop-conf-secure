@@ -41,7 +41,7 @@ by this "ls". Find this suffix and use it below here:
 
 3. Create Kerberos Principals (guest)
 
-  Git clone hadoop-conf on your guest VM.
+  git clone https://github.com/ekoontz/hadoop-conf.git
 
   Within your top-level hadoop-conf dir:
 
