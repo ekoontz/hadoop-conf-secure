@@ -68,11 +68,11 @@ The guest VM should be able to connect to the host computer's ntpd so
 that the guest can keep its time in sync with the host, which is
 important for Kerberos tickets to work correctly. See also step 7 below for ntp configuration on the guest VM.
 
-5. On guest VM, install and start bind, krb5kdc, and ntpdate (guest)
+5. Install krb5kdc, bind and ntpdate (guest)
 
   [root@centos1]# yum -y install krb5-server bind ntpdate
 
-6. Configure named on guest VM (guest)
+6. Configure bind on guest VM (guest)
 
 Add the following at the bottom of /etc/named.conf:
 
@@ -125,11 +125,29 @@ root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/kr
   [ekoontz@centos1 ~]$ ps -ef | grep bind
   nobody    2815     1  0 11:39 ?        00:00:00 /usr/sbin/dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
 
-10. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network (host)
+10. Test guest-run named from host (host)
+
+Both of the hostnames you added in step 6 should be resolvable:
+
+   $ dig @172.16.175.3 centos.local +short
+   172.16.175.3
+
+   $ dig @172.16.175.3 eugenes-macbook-pro.local
+   172.16.175.1
+
+And reverse-resolvable:
+
+   $ dig @172.16.175.3 -x 172.168.175.3 +short
+   centos.local.
+
+   $ dig @172.16.175.3 -x 172.168.175.1 +short
+   eugenes-macbook.pro.local.
+
+11. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network (host)
 
   export DNS_SERVERS=172.16.175.3
 
-11. Edit $HOME/hadoop-conf/krb5.conf: set kdc and admin_server to IP of VM on host-only network (host)
+12. Edit $HOME/hadoop-conf/krb5.conf: set kdc and admin_server to IP of VM on host-only network (host)
 
   [realms]
    EXAMPLE.COM = {
@@ -139,11 +157,11 @@ root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/kr
     admin_server = 172.16.175.3
    }
 
-12. Install Hadoop configuration in hadoop-runtime (host)
+13. Install Hadoop configuration in hadoop-runtime (host)
 
   make install
 
-13. Sync guest clock (guest)
+14. Sync guest clock (guest)
 
   [root@centos1]# sudo service ntpdate restart; date
 
@@ -153,14 +171,14 @@ built-in battery-powered clock, but the guest VM must be synced
 manually via the above step. (Perhaps there's a way to have it
 automatically sync periodically but I am not aware of it).
 
-14. Start Hadoop (host)
+15. Start Hadoop (host)
 
 (You will eventually want to run this in a screen session after
 doing it a few times).
 
   make start
 
-15. Test (host)
+16. Test (host)
 
 Run a simple Map-Reduce job through the Hadoop runtime.
 
