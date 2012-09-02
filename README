@@ -97,7 +97,7 @@ Add the following as the file /var/named/local.db:
   @    SOA LOCALHOST. foobar (1 1h 15m 30d 2h)
        NS LOCALHOST.
   eugenes-macbook-pro  A	172.16.175.1
-  centos		     A	172.16.175.3
+  centos	       A	172.16.175.3
 
 
 Add the following as the file /var/named/local.ptr.db:
