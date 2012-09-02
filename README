@@ -148,7 +148,7 @@ And reverse-resolvable:
    $ dig @172.16.175.3 -x 172.168.175.1 +short
    eugenes-macbook.pro.local.
 
-11. Edit hadoop-env.sh and yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network (host)
+11. Edit $HOME/hadoop-conf/hadoop-env.sh and $HOME/hadoop-conf/yarn-env.sh's DNS_SERVERS: set to IP of VM on host-only network (host)
 
   export DNS_SERVERS=172.16.175.3
 

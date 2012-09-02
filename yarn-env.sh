@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # separate multiple DNS servers with commas (,)
-export DNS_SERVERS=172.16.175.3
+export DNS_SERVERS=PUT_YOUR_DNS_SERVERS_HERE
 export HADOOP_ROOT_LOGGER="INFO,console"
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5007"
 export     YARN_NODEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5008"
