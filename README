@@ -35,7 +35,7 @@ updates. The other is a host-only network on a private range
   cd 
   git clone git://git.apache.org/hadoop-common.git
   cd hadoop-common
-  mvn package -Pdist
+  mvn package -DskipTests -Pdist
   cd
   ls hadoop-common/hadoop-dist/target/hadoop-*
 
