@@ -132,7 +132,7 @@ Both of the hostnames you added in step 6 should be resolvable:
    $ dig @172.16.175.3 centos.local +short
    172.16.175.3
 
-   $ dig @172.16.175.3 eugenes-macbook-pro.local
+   $ dig @172.16.175.3 eugenes-macbook-pro.local +short
    172.16.175.1
 
 And reverse-resolvable:
