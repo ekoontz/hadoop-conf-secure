@@ -102,6 +102,7 @@ hdfs-site.xml: templates/hdfs-site.xml
 
 mapred-site.xml: templates/mapred-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+	         --stringparam realm $(REALM) \
 	         --stringparam homedir `echo $$HOME` rewrite-hosts.xsl $^ | xmllint --format - > $@
 
 yarn-site.xml: templates/yarn-site.xml

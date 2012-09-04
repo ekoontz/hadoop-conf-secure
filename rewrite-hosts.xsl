@@ -125,6 +125,12 @@
       <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
     </xsl:copy>
   </xsl:template>
+  <xsl:template match="property[name/text()='mapreduce.jobhistory.keytab']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
 
   <xsl:template match="property[name/text()='dfs.namenode.kerberos.principal']">
     <xsl:copy select=".">
@@ -166,6 +172,12 @@
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
       <value>yarn/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="property[name/text()='mapreduce.jobhistory.kerberos.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>jt/_HOST@<xsl:value-of select="$realm"/></value>
     </xsl:copy>
   </xsl:template>
 
