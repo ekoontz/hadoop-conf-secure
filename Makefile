@@ -30,7 +30,7 @@ envquiet:
 	echo "Realm name:                   $(REALM)"
 
 principals:
-	export KRB5_CONFIG=$(KRB5_CONFIG); export MASTER=$(MASTER); sh principals.sh
+	export KRB5_CONFIG=$(KRB5_CONFIG); sh principals.sh $(MASTER)
 
 install: clean all ~/hadoop-runtime
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
