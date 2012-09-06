@@ -16,10 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Set Hadoop-specific environment variables here.
-#separate multiple servers with commas (,)
-export DNS_SERVERS=PUT_YOUR_DNS_SERVERS_HERE
+if [ ! -f hadoop-conf.sh ]; then
+    echo "Error: no hadoop-conf.sh file found."
+    exit 1
+else
+    source hadoop-conf.sh
+fi
 
+# Set Hadoop-specific environment variables here.
 # The only required environment variable is JAVA_HOME.  All others are
 # optional.  When running a distributed configuration it is best to
 # set JAVA_HOME in this file, so that it is correctly defined on

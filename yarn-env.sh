@@ -12,8 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# separate multiple DNS servers with commas (,)
-export DNS_SERVERS=PUT_YOUR_DNS_SERVERS_HERE
+if [ ! -f hadoop-conf.sh ]; then
+    echo "Error: no hadoop-conf.sh file found."
+    exit 1
+else
+    source hadoop-conf.sh
+fi
+source hadoop-conf.sh
 export HADOOP_ROOT_LOGGER="INFO,console"
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5007"
 export     YARN_NODEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5008"
