@@ -66,7 +66,7 @@ start-yarn: kill-yarn
 	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
 
 start-zookeeper:
-	$(ZOOKEEPER_HOME)/bin/zkServer.sh start-foreground 
+	$(ZOOKEEPER_HOME)/bin/zkServer.sh start
 
 start: kill start-hdfs start-yarn start-zookeeper
 
