@@ -1,11 +1,13 @@
-.PHONY=all clean install start test test-hdfs test-mapreduce kill principals printenv envquiet normaluser hdfsuser
+.PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
+ envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper
+# ^^ TODO: add test-zookeeper.
 
 # config files that are rewrittten by rewrite-config.xsl.
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
-OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh
+OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/tmp/hadoop-data
@@ -14,7 +16,7 @@ HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
 KRB5_CONFIG=./krb5.conf
-KADMIN_LOCAL="ssh 172.16.153.3 'sudo kadmin.local'"
+KADMIN_LOCAL="ssh 172.16.175.3 'sudo kadmin.local'"
 all: $(CONFIGS)
 
 printenv:
@@ -36,20 +38,37 @@ install: clean all ~/hadoop-runtime
 ~/hadoop-runtime:
 	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
 
-kill: 
-	-sh kill.sh
+#add kill-hdfs and kill-yarn as sub-targets.
 
-start: kill
+kill: kill-hdfs kill-yarn kill-zookeeper
+	echo
+# ^^^ need a dummy action here (e.g. an echo) to avoid default action (cat kill.sh > kill, for some reason.)
+
+kill-hdfs: 
+	-sh kill.sh hdfs
+
+kill-yarn:
+	-sh kill.sh yarn
+
+kill-zookeeper:
+	-sh kill.sh zookeeper
+
+start-hdfs: kill-hdfs
 	-rm -rf /tmp/logs
 	cd $(HOME)/hadoop-runtime
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 	$(HADOOP_RUNTIME)/bin/hdfs namenode &
 	$(HADOOP_RUNTIME)/bin/hdfs datanode &
+
+start-yarn: kill-yarn
 	$(HADOOP_RUNTIME)/bin/yarn resourcemanager &
 	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
+
+start-zookeeper:
 	$(ZOOKEEPER_HOME)/bin/zkServer.sh start-foreground 
 
+start: kill start-hdfs start-yarn start-zookeeper
 
 # use password authentication.
 normaluser:
@@ -84,12 +103,16 @@ debug:
 
 test: hdfs-test mapreduce-test
 
-hdfs-test: permissions normaluser
+test-hdfs: permissions normaluser
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
 
-mapreduce-test: normaluser
+test-mapreduce: normaluser
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
+
+#deprecated.
+hdfs-test: test-hdfs
+mapreduce-test: test-mapreduce
 
 clean:
 	-rm $(CONFIGS)
