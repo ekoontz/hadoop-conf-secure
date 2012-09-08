@@ -2,10 +2,11 @@ Introduction
 
 This is intended to get a secure 2.0-era Hadoop installed, from
 source, in a purely-local configuration on your computer for
-development purposes. It allows you to work with secure Hadoop even
-when your computer is not connected to the Internet.  It requires that
-you install a virtual machine running Linux to provide a DNS server
-(named) and a Kerberos Key Distribution Center. The host computer
+development purposes. It uses a private host-only network to run the
+Hadoop network on. This allows you to work with secure Hadoop even when
+your computer is not connected to the Internet.  It requires that you
+install a virtual machine running Linux to provide a DNS server
+(named) and a Kerberos Key Distribution Center (KDC). The host computer
 provides the virtualization environment, runs a NTP (network time
 protocol) server. The latter service allows your VM to sync itself to
 the correct (host-determined time and date) when you awaken your
@@ -18,24 +19,29 @@ http://ekoontz.github.com/hadoop/2012/02/27/hadoop-from-source/
 
 Quick Start
 
-Below, I use "(host)" and "(guest)" to clarify which action should be
-done on your host computer or your guest VM, respectively.
+Below, I use "(host)" and "(guest)" at the top of each step to clarify
+which action should be done on your host computer or your guest VM,
+respectively.
 
-1. Set up a VM with Linux with a host-only network. 
+1. Set up a VM with Linux with a host-only network. (host)
 
 VMWare, Virtual Box, or another virtualization product should
 work. You should set up the VM so that the guest OS has access to two
 networks. One will be a bridged network that allows the guest
 OS to connect to the Internet so that it can install packages and
-updates. The other is a host-only network on a private range
-(e.g. 175.16.172.0/8).
+updates and access remote git software repositories.
+
+The other is a host-only network on a private range
+(e.g. 175.16.172.0/8). This will be the network that we will run
+Hadoop on.  All configuration below will be done with reference only
+to this latter network.
 
 2. Set up your hadoop-runtime dir (host)
 
   cd 
   git clone git://git.apache.org/hadoop-common.git
   cd hadoop-common
-  mvn package -DskipTests -Pdist
+  mvn clean package -DskipTests -Pdist
   cd
   ls hadoop-common/hadoop-dist/target/hadoop-*
 
@@ -115,6 +121,7 @@ Add the following as the file /var/named/local.ptr.db:
   3    			IN PTR	centos.local.
 
 8. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network (guest)
+I recommend that you use *only* this server as the DNS server to simplify diagnostics.
 
   [ekoontz@centos1 ~]$ cat /etc/ntp.conf | grep server
 
@@ -126,7 +133,7 @@ Add the following as the file /var/named/local.ptr.db:
   [root@centos1]# chkconfig bind on
   [root@centos1]# chkconfig ntpdate on
 
-10. On guest VM, make sure bind, krb5kdc are running (guest)
+10. On guest VM, make sure bind and krb5kdc are running (guest)
 
    [ekoontz@centos1 ~]$ ps -ef | grep krb5kdc
 root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/krb5kdc.pid
