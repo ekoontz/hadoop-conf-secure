@@ -175,6 +175,7 @@ And reverse-resolvable:
 
 14. Install Hadoop configuration in hadoop-runtime (host)
 
+  cd ~/hadoop-conf
   make install
 
 15. Sync guest clock (guest)
