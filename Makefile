@@ -1,22 +1,24 @@
 .PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
- envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper
+ envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper debug2
 # ^^ TODO: add test-zookeeper.
 
-# config files that are rewrittten by rewrite-config.xsl.
+# config files that are rewritten by rewrite-config.xsl.
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
-OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh
+OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh services.keytab
 
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/tmp/hadoop-data
-MASTER=`hostname -f | tr "[:upper:]" "[:lower:]"`
+
+#this is kind of crazy, sorry. would like a simpler way.
+MASTER=`export MASTER=\`echo \`\`hostname -f | tr "[:upper:]" "[:lower:]"\`\`\`; echo $$MASTER`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
 KRB5_CONFIG=./krb5.conf
-KADMIN_LOCAL="ssh 172.16.175.3 'sudo kadmin.local'"
+DNS_SERVER=172.16.175.3
 all: $(CONFIGS)
 
 printenv:
@@ -29,10 +31,12 @@ envquiet:
 	echo "Tmp directory:                $(TMPDIR)"
 	echo "Realm name:                   $(REALM)"
 
-principals:
-	export KRB5_CONFIG=$(KRB5_CONFIG); sh principals.sh $(MASTER)
+services.keytab:
+	scp principals.sh $(DNS_SERVER):
+	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER)"
+	scp $(DNS_SERVER):services.keytab .
 
-install: clean all ~/hadoop-runtime
+install: clean all ~/hadoop-runtime services.keytab
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
 ~/hadoop-runtime:
@@ -97,9 +101,18 @@ permissions: hdfsuser
 
 #print some diagnostics
 debug:
-	echo "MASTER:         " $(MASTER)
-	echo "REALM:          " $(REALM)
-	echo "HADOOP_RUNTIME: " $(HADOOP_RUNTIME)
+	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER); make -s -e debug2
+
+debug2:
+	echo " MASTER:            $(MASTER)"
+	echo " REALM:             $(REALM)"
+	echo " DNS_SERVER:        $(DNS_SERVER)"
+	echo " MASTER DNS LOOKUP: `dig @$(DNS_SERVER) $(MASTER) +short`"
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo " REVERSE MASTER DNS LOOKUP: `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
+	echo " MASTER DATE:     " `date`
+	echo " DNS_SERVER DATE: " `ssh $(DNS_SERVER) date`
+	ktutil -k services.keytab l
+
 
 test: hdfs-test mapreduce-test
 
@@ -115,7 +128,7 @@ hdfs-test: test-hdfs
 mapreduce-test: test-mapreduce
 
 clean:
-	-rm $(CONFIGS)
+	-rm $(CONFIGS) services.keytab
 
 core-site.xml: templates/core-site.xml
 	xsltproc --stringparam hostname `hostname -f` rewrite-config.xsl $^ | xmllint --format - > $@
