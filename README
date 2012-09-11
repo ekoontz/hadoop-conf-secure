@@ -190,6 +190,23 @@ guest VM must be synced manually via the above step. (Perhaps there's
 a way to have it automatically sync periodically but I am not aware of
 it).
 
+If you get an error message from ntpdate such as "no server suitable
+for synchronization found", try running with -d for more information:
+
+   [root@centos1]# sudo ntpdate -d 172.16.175.1
+
+Where "172.16.175.1" is the host-only IP of your host machine. If your
+debugging output shows "172.16.175.1: Server dropped: strata too
+high", then your host OS's ntpd server is probably not synced with its
+own external time source. Try restarting ntpd on your host OS:
+
+   $ sudo killall ntpd
+
+Wait a few seconds and make sure that ntpd is running on the host OS, 
+then try again on the guest OS to do:
+
+   [root@centos1]# sudo ntpdate -d 172.16.175.1
+
 16. Start Hadoop (host)
 
 (You will eventually want to run this in a screen session after
