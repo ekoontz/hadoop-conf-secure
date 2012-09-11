@@ -46,7 +46,8 @@ install: clean all ~/hadoop-runtime services.keytab
 
 kill: kill-hdfs kill-yarn kill-zookeeper
 	echo
-# ^^^ need a dummy action here (e.g. an echo) to avoid default action (cat kill.sh > kill, for some reason.)
+# ^^^ need a dummy action here (e.g. an echo) to avoid default action -
+# default action is "cat kill.sh > kill", for some reason.)
 
 kill-hdfs: 
 	-sh kill.sh hdfs
@@ -112,8 +113,8 @@ debug2:
 	echo " MASTER:            $(MASTER)"
 	echo " REALM:             $(REALM)"
 	echo " DNS_SERVER:        $(DNS_SERVER)"
-	echo " MASTER DNS LOOKUP: `dig @$(DNS_SERVER) $(MASTER) +short`"
-	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo " REVERSE MASTER DNS LOOKUP: `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
+	echo " MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo " REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
 	echo " MASTER DATE:     " `date`
 	echo " DNS_SERVER DATE: " `ssh $(DNS_SERVER) date`
 	ktutil -k services.keytab l
