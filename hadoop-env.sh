@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ ! -f hadoop-conf.sh ]; then
+if [ ! -f $HOME/hadoop-runtime/etc/hadoop/hadoop-conf.sh ]; then
     echo "Error: no hadoop-conf.sh file found."
     exit 1
 else
-    source hadoop-conf.sh
+    source $HOME/hadoop-runtime/etc/hadoop/hadoop-conf.sh
 fi
 
 # Set Hadoop-specific environment variables here.
