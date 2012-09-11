@@ -1,5 +1,5 @@
 .PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
- envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper debug2
+ envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper debug2 server
 # ^^ TODO: add test-zookeeper.
 
 # config files that are rewritten by rewrite-config.xsl.
@@ -74,6 +74,11 @@ start-zookeeper:
 
 start: kill start-hdfs start-yarn start-zookeeper
 
+# restart ntpdate and krb5kdc on server.
+server:
+	ssh -t $(DNS_SERVER) "sudo service ntpdate restart"
+	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
+
 # use password authentication.
 normaluser:
 	-kdestroy
@@ -112,7 +117,6 @@ debug2:
 	echo " MASTER DATE:     " `date`
 	echo " DNS_SERVER DATE: " `ssh $(DNS_SERVER) date`
 	ktutil -k services.keytab l
-
 
 test: hdfs-test mapreduce-test
 
