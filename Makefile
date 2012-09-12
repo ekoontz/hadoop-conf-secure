@@ -1,5 +1,5 @@
 .PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
- envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper debug2 server
+ envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 serversync
 # ^^ TODO: add test-zookeeper.
 
 # config files that are rewritten by rewrite-config.xsl.
@@ -76,7 +76,7 @@ start-zookeeper:
 start: kill start-hdfs start-yarn start-zookeeper
 
 # restart ntpdate and krb5kdc on server.
-server:
+serversync:
 	ssh -t $(DNS_SERVER) "sudo service ntpdate restart"
 	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
 
@@ -106,18 +106,25 @@ permissions: hdfsuser
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(MASTER):8020/
 
 #print some diagnostics
-debug:
-	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER); make -s -e debug2
+report:
+	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER); make -s -e report2
 
-debug2:
-	echo " MASTER:            $(MASTER)"
-	echo " REALM:             $(REALM)"
-	echo " DNS_SERVER:        $(DNS_SERVER)"
-	echo " MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
+report2:
+	echo " HOSTS:"
+	echo "  MASTER:                      $(MASTER)"
+	echo " DNS:"
+	echo "  DNS_SERVER:                  $(DNS_SERVER)"
+	echo "  DNS CLIENT TESTING:"
+	echo "   MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
 	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo " REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
-	echo " MASTER DATE:     " `date`
-	echo " DNS_SERVER DATE: " `ssh $(DNS_SERVER) date`
-	ktutil -k services.keytab l
+	echo " DATE:"
+	echo "  MASTER DATE:                " `date`
+	echo "  DNS_SERVER DATE:            " `ssh $(DNS_SERVER) date`
+	echo " KERBEROS:"
+	echo "  REALM:                       $(REALM)"
+	echo ""
+	ktutil -k services.keytab l | head
+	echo "(showing above only first 10 lines of keytab contents)"
 
 test: hdfs-test mapreduce-test
 
