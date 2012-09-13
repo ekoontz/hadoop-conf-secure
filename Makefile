@@ -132,16 +132,16 @@ report2:
 	echo ""
 	echo " HADOOP CONF:"
 	echo "  HDFS:"
-	echo " fs.defaultFS:                    " `xpath $(HADOOP_RUNTIME)/etc/hadoop/core-site.xml "/configuration/property[name='fs.defaultFS']/value/text()" 2> /dev/null`
-	echo " dfs.namenode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.keytab.file']/value/text()" 2> /dev/null`
-	echo " dfs.namenode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.kerberos.principal']/value/text()" 2> /dev/null`
-	echo " dfs.datanode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.keytab.file']/value/text()" 2> /dev/null`
-	echo " dfs.datanode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.kerberos.principal']/value/text()" 2> /dev/null`
+	echo "   fs.defaultFS:                    " `xpath $(HADOOP_RUNTIME)/etc/hadoop/core-site.xml "/configuration/property[name='fs.defaultFS']/value/text()" 2> /dev/null`
+	echo "   dfs.namenode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.keytab.file']/value/text()" 2> /dev/null`
+	echo "   dfs.namenode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.kerberos.principal']/value/text()" 2> /dev/null`
+	echo "   dfs.datanode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.keytab.file']/value/text()" 2> /dev/null`
+	echo "   dfs.datanode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.kerberos.principal']/value/text()" 2> /dev/null`
 	echo "  YARN:"
-	echo " yarn.resourcemanager.keytab:     " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.keytab']/value/text()" 2> /dev/null`
-	echo " yarn.resourcemanager.principal:  " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.principal']/value/text()" 2> /dev/null`
-	echo " yarn.nodemanager.keytab:         " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.keytab']/value/text()" 2> /dev/null`
-	echo " yarn.nodemanager.principal:      " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.principal']/value/text()" 2> /dev/null`
+	echo "   yarn.resourcemanager.keytab:     " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.keytab']/value/text()" 2> /dev/null`
+	echo "   yarn.resourcemanager.principal:  " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.principal']/value/text()" 2> /dev/null`
+	echo "   yarn.nodemanager.keytab:         " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.keytab']/value/text()" 2> /dev/null`
+	echo "   yarn.nodemanager.principal:      " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.principal']/value/text()" 2> /dev/null`
 
 test: hdfs-test mapreduce-test
 
