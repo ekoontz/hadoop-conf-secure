@@ -1,4 +1,4 @@
-.PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
+.PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
  envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync
 
 # ^^ TODO: add test-zookeeper.
@@ -74,7 +74,9 @@ start-yarn: kill-yarn
 start-zookeeper:
 	$(ZOOKEEPER_HOME)/bin/zkServer.sh start
 
-start: kill start-hdfs start-yarn start-zookeeper
+restart: kill start
+
+start: start-hdfs start-yarn start-zookeeper
 
 # restart ntpdate and krb5kdc on server.
 sync:
@@ -87,7 +89,7 @@ normaluser:
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM)
 
 # use keytab authentication.
-hdfsuser:
+hdfsuser: services.keytab
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
 
