@@ -37,7 +37,7 @@ services.keytab:
 	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER)"
 	scp $(DNS_SERVER):services.keytab .
 
-install: clean all ~/hadoop-runtime services.keytab
+install: all ~/hadoop-runtime services.keytab
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
 ~/hadoop-runtime:
