@@ -19,7 +19,7 @@ HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
 KRB5_CONFIG=./krb5.conf
-DNS_SERVER=172.16.175.3
+DNS_SERVER=`cat hadoop-conf.sh | grep DNS_SERVERS | awk 'BEGIN {FS = "="} ; {print $$2}'`
 all: $(CONFIGS)
 
 printenv:
@@ -116,7 +116,7 @@ report2:
 	echo "   HADOOP_RUNTIME DIR:             $(HADOOP_RUNTIME)"
 	echo " DNS:"
 	echo "  DNS_SERVER:                      $(DNS_SERVER)"
-	echo "  DNS CLIENT:"
+	echo "  DNS CLIENT QUERIES:"
 	echo "   MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
 	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "   REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
 	echo " DATE:"
@@ -160,20 +160,25 @@ clean:
 	-rm $(CONFIGS) services.keytab
 
 core-site.xml: templates/core-site.xml
-	xsltproc --stringparam hostname `hostname -f` rewrite-config.xsl $^ | xmllint --format - > $@
+	xsltproc --stringparam hostname `hostname -f` \
+                 --stringparam dns_server $(DNS_SERVER) \
+                 rewrite-config.xsl $^ | xmllint --format - > $@
 
 hdfs-site.xml: templates/hdfs-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+                 --stringparam dns_server $(DNS_SERVER) \
 	         --stringparam homedir `echo $$HOME` \
 	         --stringparam realm $(REALM) \
                  --stringparam tmpdir $(TMPDIR) rewrite-config.xsl $^  | xmllint --format - > $@
 
 mapred-site.xml: templates/mapred-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+                 --stringparam dns_server $(DNS_SERVER) \
 	         --stringparam homedir `echo $$HOME` rewrite-config.xsl $^ | xmllint --format - > $@
 
 yarn-site.xml: templates/yarn-site.xml
 	xsltproc --stringparam hostname `hostname -f` \
+                 --stringparam dns_server $(DNS_SERVER) \
 	         --stringparam realm $(REALM) \
 	         --stringparam homedir `echo $$HOME` rewrite-config.xsl $^ | xmllint --format - > $@
 
