@@ -1,5 +1,6 @@
 .PHONY=all clean install start start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
- envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 serversync
+ envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync
+
 # ^^ TODO: add test-zookeeper.
 
 # config files that are rewritten by rewrite-config.xsl.
@@ -76,7 +77,7 @@ start-zookeeper:
 start: kill start-hdfs start-yarn start-zookeeper
 
 # restart ntpdate and krb5kdc on server.
-serversync:
+sync:
 	ssh -t $(DNS_SERVER) "sudo service ntpdate restart"
 	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
 
@@ -107,24 +108,40 @@ permissions: hdfsuser
 
 #print some diagnostics
 report:
-	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER); make -s -e report2
+	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER) HADOOP_RUNTIME=$(HADOOP_RUNTIME); make -s -e report2
 
 report2:
 	echo " HOSTS:"
-	echo "  MASTER:                      $(MASTER)"
+	echo "  MASTER:                          $(MASTER)"
+	echo "   HADOOP_RUNTIME DIR:             $(HADOOP_RUNTIME)"
 	echo " DNS:"
-	echo "  DNS_SERVER:                  $(DNS_SERVER)"
-	echo "  DNS CLIENT TESTING:"
+	echo "  DNS_SERVER:                      $(DNS_SERVER)"
+	echo "  DNS CLIENT:"
 	echo "   MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
-	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo " REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "   REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
 	echo " DATE:"
-	echo "  MASTER DATE:                " `date`
-	echo "  DNS_SERVER DATE:            " `ssh $(DNS_SERVER) date`
+	echo "  MASTER DATE:                    " `date`
+	echo "  DNS_SERVER DATE:                " `ssh $(DNS_SERVER) date`
 	echo " KERBEROS:"
-	echo "  REALM:                       $(REALM)"
-	echo ""
+	echo "  REALM:                           $(REALM)"
+	echo "  TICKET CACHE:"
+	echo `klist`
+	echo "  KEYTAB:"
 	ktutil -k services.keytab l | head
 	echo "(showing above only first 10 lines of keytab contents)"
+	echo ""
+	echo " HADOOP CONF:"
+	echo "  HDFS:"
+	echo " fs.defaultFS:                    " `xpath $(HADOOP_RUNTIME)/etc/hadoop/core-site.xml "/configuration/property[name='fs.defaultFS']/value/text()" 2> /dev/null`
+	echo " dfs.namenode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.keytab.file']/value/text()" 2> /dev/null`
+	echo " dfs.namenode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.kerberos.principal']/value/text()" 2> /dev/null`
+	echo " dfs.datanode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.keytab.file']/value/text()" 2> /dev/null`
+	echo " dfs.datanode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.datanode.kerberos.principal']/value/text()" 2> /dev/null`
+	echo "  YARN:"
+	echo " yarn.resourcemanager.keytab:     " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.keytab']/value/text()" 2> /dev/null`
+	echo " yarn.resourcemanager.principal:  " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.principal']/value/text()" 2> /dev/null`
+	echo " yarn.nodemanager.keytab:         " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.keytab']/value/text()" 2> /dev/null`
+	echo " yarn.nodemanager.principal:      " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.principal']/value/text()" 2> /dev/null`
 
 test: hdfs-test mapreduce-test
 
