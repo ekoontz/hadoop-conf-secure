@@ -1,5 +1,6 @@
-.PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs test-mapreduce kill principals printenv \
- envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync
+.PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
+  test-mapreduce kill stop principals printenv start-namenode start-datanode initialize-hdfs\
+  envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync
 
 # ^^ TODO: add test-zookeeper.
 
@@ -43,7 +44,7 @@ install: all ~/hadoop-runtime services.keytab
 ~/hadoop-runtime:
 	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
 
-#add kill-hdfs and kill-yarn as sub-targets.
+stop: kill
 
 kill: kill-hdfs kill-yarn kill-zookeeper
 	echo
@@ -59,12 +60,18 @@ kill-yarn:
 kill-zookeeper:
 	-sh kill.sh zookeeper
 
-start-hdfs: kill-hdfs
+start-hdfs: kill-hdfs initialize-hdfs start-namenode start-datanode
+
+initialize-hdfs:
 	-rm -rf /tmp/logs
 	cd $(HOME)/hadoop-runtime
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
+
+start-namenode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs namenode &
+
+start-datanode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs datanode &
 
 start-yarn: kill-yarn
@@ -76,7 +83,7 @@ start-zookeeper:
 
 restart: kill start
 
-start: start-hdfs start-yarn start-zookeeper
+start: sync start-hdfs start-yarn start-zookeeper
 
 # restart ntpdate and krb5kdc on server.
 sync:
@@ -93,8 +100,13 @@ hdfsuser: services.keytab
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
 
+rmr-tmp: hdfsuser
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
+	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
+	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
+
 # this modifies HDFS permissions so that normal user can run jobs.
-permissions: hdfsuser
+permissions: rmr-tmp
 	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
 	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
 	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
@@ -115,6 +127,7 @@ report:
 report2:
 	echo " HOSTS:"
 	echo "  MASTER:                          $(MASTER)"
+	echo "   HOSTNAME:                        `hostname -f`"
 	echo "   HADOOP_RUNTIME DIR:             $(HADOOP_RUNTIME)"
 	echo " DNS:"
 	echo "  DNS_SERVER:                      $(DNS_SERVER)"
@@ -151,6 +164,7 @@ test-hdfs: permissions normaluser
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
 
 test-mapreduce: normaluser
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
