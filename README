@@ -81,7 +81,8 @@ where OPT=VAL pairs look like these examples
 
 The guest VM should be able to connect to the host computer's ntpd so
 that the guest can keep its time in sync with the host, which is
-important for Kerberos tickets to work correctly. See also step 7 below for ntp configuration on the guest VM.
+important for Kerberos tickets to work correctly. See also step 7
+below for ntp configuration on the guest VM.
 
 6. Install krb5kdc, bind and ntpdate (guest)
 
