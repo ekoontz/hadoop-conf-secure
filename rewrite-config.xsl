@@ -81,6 +81,15 @@
     </xsl:copy>
   </xsl:template>
 
+<!-- Following two properties (fs.defaultFS and fs.default.name)
+     are synonymous: support hadoop greater-than 1 as well as hadoop 1. -->
+  <xsl:template match="property[name/text()='fs.defaultFS']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="substring-before(value,':')"/>://<xsl:value-of select="$hostname"/>:<xsl:value-of select="substring-after(substring-after(value,':'),':')"/>
+      </value>
+    </xsl:copy>
+  </xsl:template>
   <xsl:template match="property[name/text()='fs.default.name']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>

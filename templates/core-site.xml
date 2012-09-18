@@ -11,7 +11,7 @@
     <value>true</value>
   </property>
   <property>
-    <name>fs.default.name</name>
+    <name>fs.defaultFS</name>
     <value>hdfs://xxxxxx:8020/</value>
   </property>
   <property>
