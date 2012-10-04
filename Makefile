@@ -1,6 +1,7 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
   test-mapreduce kill stop principals printenv start-namenode start-datanode initialize-hdfs\
-  envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync
+  envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync \
+  runtest manualsync
 
 # ^^ TODO: add test-zookeeper.
 
@@ -83,7 +84,15 @@ start-zookeeper:
 
 restart: kill start
 
-start: sync start-hdfs start-yarn start-zookeeper
+start: sync services.keytab start-hdfs start-yarn start-zookeeper
+
+start2: manualsync services.keytab start-hdfs start-yarn start-zookeeper
+
+manualsync:
+	ssh -t $(DNS_SERVER) "sudo date `date '+%m%d%H%M%Y.%S'`"
+
+sync-time-of-dns-server:
+	export DNS_SERVER=$(DNS_SERVER)	; make -s -e sync
 
 # restart ntpdate and krb5kdc on server.
 sync:
@@ -159,7 +168,10 @@ report2:
 	echo "   yarn.nodemanager.keytab:         " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.keytab']/value/text()" 2> /dev/null`
 	echo "   yarn.nodemanager.principal:      " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.principal']/value/text()" 2> /dev/null`
 
-test: hdfs-test mapreduce-test
+test:
+	export MASTER=$(MASTER); make -s -e runtest
+
+runtest: hdfs-test mapreduce-test
 
 test-hdfs: permissions normaluser
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
