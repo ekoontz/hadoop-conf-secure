@@ -1,26 +1,28 @@
 #!/bin/sh
-
 CLASS=$1
 
-if [ $1 = "yarn" ]; then
-    APACHE_PIDS=`jps | grep "NodeManager\|ResourceManager" | awk '{print $1}'`
-else
-    if [ $1 = "hdfs" ]; then
-	APACHE_PIDS=`jps | grep "DataNode\|NameNode" | awk '{print $1}'`
-    else
-	if [ $1 = "zookeeper" ]; then
-	    APACHE_PIDS=`jps | grep "QuorumPeerMain" | awk '{print $1}'`
-	else
-	    if [ -z $1 ]; then
-		echo "killing HDFS, YARN, and ZK."
-		APACHE_PIDS=`jps | grep "DataNode\|NameNode\|NodeManager\|ResourceManager\|QuorumPeerMain" | awk '{print $1}'`
-	    else
-		echo "Unknown class '$1' of Java pids to kill."
-		echo "Usage: kill.sh (yarn|hdfs|zookeeper)"
-		exit 1
-	    fi
-	fi
-    fi
+if [ $CLASS = "yarn" ]; then
+    GREP="NodeManager\|ResourceManager"
+fi
+if [ $CLASS = "resourcemanager" ]; then
+    GREP="ResourceManager"
+fi
+if [ $CLASS = "nodemanager" ]; then
+    GREP="Nodemanager"
+fi
+if [ $CLASS = "hdfs" ]; then
+    GREP="DataNode\|NameNode"
+fi
+if [ $CLASS = "zookeeper" ]; then
+    GREP="QuorumPeerMain"
+fi
+if [ -z $CLASS ]; then
+    echo "killing HDFS, YARN, and ZK."
+    GREP="DataNode\|NameNode\|NodeManager\|ResourceManager\|QuorumPeerMain"
+fi
+
+if [ ! -z $GREP ]; then
+    APACHE_PIDS=`jps | grep $GREP | awk '{print $1}'`
 fi
 
 while [ -n "$APACHE_PIDS" ]; do
@@ -30,7 +32,7 @@ while [ -n "$APACHE_PIDS" ]; do
     do
 	#TODO: works for hadoop daemons, but not zookeeper, since last arg of zookeeper command line is 
 	#configuration file not class name.
-	ROLE=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | grep $PID | awk '{print $2}'`
+	ROLE=`jps | grep "$GREP" | grep $PID | awk '{print $2}'`
 	echo "killing apache java process: $PID ($ROLE)"
 	kill $PID
     done
@@ -39,7 +41,7 @@ while [ -n "$APACHE_PIDS" ]; do
     sleep 10
 
     #terminate any stragglers
-    APACHE_PIDS=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | awk '{print $1}'`
+    APACHE_PIDS=`jps | grep "$GREP" | awk '{print $1}'`
     for PID in $APACHE_PIDS
     do
 	echo "terminating straggler apache java process: $PID"
@@ -47,5 +49,5 @@ while [ -n "$APACHE_PIDS" ]; do
     done
 
     sleep 3
-    APACHE_PIDS=`jps | grep "DataNode\|NameNode\|QuorumPeerMain\|NodeManager\|ResourceManager" | awk '{print $1}'`
+    APACHE_PIDS=`jps | grep "$GREP" | awk '{print $1}'`
 done
