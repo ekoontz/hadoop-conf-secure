@@ -131,7 +131,7 @@ I recommend that you use *only* this server as the DNS server to simplify diagno
 9. Start services on guest VM (guest)
 
   [root@centos1]# chkconfig krb5kdc on
-  [root@centos1]# chkconfig bind on
+  [root@centos1]# chkconfig named on
   [root@centos1]# chkconfig ntpdate on
 
 10. On guest VM, make sure bind and krb5kdc are running (guest)
