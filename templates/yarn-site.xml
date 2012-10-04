@@ -67,6 +67,11 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.local-dirs</name>
+    <value>/tmp/nm-local-dir</value>
+  </property>
+
+  <property>
     <name>mapreduce.map.log.level</name>
     <value>DEBUG</value>
   </property>
