@@ -19,6 +19,8 @@ else
     source hadoop-conf.sh
 fi
 source hadoop-conf.sh
+
+export YARN_LOG_DIR=/tmp
 export HADOOP_ROOT_LOGGER="INFO,console"
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5007"
 export     YARN_NODEMANAGER_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5008"
