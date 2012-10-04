@@ -1,7 +1,7 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
   test-mapreduce kill stop principals printenv start-namenode start-datanode initialize-hdfs\
   envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync \
-  runtest manualsync
+  runtest manualsync start-resourcemanager start-nodemanager
 
 # ^^ TODO: add test-zookeeper.
 
@@ -58,6 +58,9 @@ kill-hdfs:
 kill-yarn:
 	-sh kill.sh yarn
 
+kill-nodemanager:
+	-sh kill.sh nodemanager
+
 kill-zookeeper:
 	-sh kill.sh zookeeper
 
@@ -75,8 +78,12 @@ start-namenode: services.keytab
 start-datanode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs datanode &
 
-start-yarn: kill-yarn
+start-yarn: kill-yarn start-resourcemanager start-nodemanager
+
+start-resourcemanager:
 	$(HADOOP_RUNTIME)/bin/yarn resourcemanager &
+
+start-nodemanager:
 	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
 
 start-zookeeper:
