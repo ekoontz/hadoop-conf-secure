@@ -137,6 +137,7 @@ report2:
 	echo " DATE:"
 	echo "  MASTER DATE:                    " `date`
 	echo "  DNS_SERVER DATE:                " `ssh $(DNS_SERVER) date`
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "  DEBUG DATE INFO:                " `ssh -t $(DNS_SERVER) "sudo ntpdate -d $(MASTER_IP)"`
 	echo " KERBEROS:"
 	echo "  REALM:                           $(REALM)"
 	echo "  TICKET CACHE:"
