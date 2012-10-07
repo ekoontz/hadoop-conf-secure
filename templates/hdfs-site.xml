@@ -19,6 +19,14 @@
     <value>xxxxxx</value>
   </property>
   <property>
+    <name>dfs.secondary.namenode.keytab.file</name>
+    <value>xxxxxx</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.kerberos.principal</name>
+    <value>xxxxxx</value>
+  </property>
+  <property>
     <name>dfs.https.enable</name>
     <value>false</value>
   </property>
@@ -67,6 +75,28 @@
   <property>
     <name>dfs.web.authentication.kerberos.principal</name>
     <value>hdfs/eugenes-macbook-pro.local@EXAMPLE.COM</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.internal.spnego.principal</name>
+    <value>xxx</value>
+  </property>
+
+  <property>
+    <name>dfs.web.authentication.kerberos.principal</name>
+    <value>xxx</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.keytab.file</name>
+    <value>xxx</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.kerberos.principal</name>
+    <value>xxx</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.internal.spnego.principal</name>
+    <value>xxx</value>
   </property>
 
 

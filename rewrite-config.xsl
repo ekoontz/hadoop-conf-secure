@@ -105,6 +105,12 @@
       <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
     </xsl:copy>
   </xsl:template>
+  <xsl:template match="property[name/text()='dfs.secondary.namenode.keytab.file']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value><xsl:value-of select="$homedir"/>/hadoop-conf/services.keytab</value>
+    </xsl:copy>
+  </xsl:template>
   <xsl:template match="property[name/text()='dfs.datanode.keytab.file']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
@@ -142,6 +148,21 @@
       <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
     </xsl:copy>
   </xsl:template>
+
+  <xsl:template match="property[name/text()='dfs.namenode.internal.spnego.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="property[name/text()='dfs.web.authentication.kerberos.principal']">
+    <xsl:copy select=".">
+      <name><xsl:value-of select="name"/></name>
+      <value>HTTP/_HOST@<xsl:value-of select="$realm"/></value>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="property[name/text()='dfs.namenode.internal.spnego.principal']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
@@ -154,7 +175,7 @@
       <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
     </xsl:copy>
   </xsl:template>
-  <xsl:template match="property[name/text()='dfs.namenode.kerberos.principal']">
+  <xsl:template match="property[name/text()='dfs.secondary.namenode.kerberos.principal']">
     <xsl:copy select=".">
       <name><xsl:value-of select="name"/></name>
       <value>hdfs/_HOST@<xsl:value-of select="$realm"/></value>
