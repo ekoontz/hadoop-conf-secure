@@ -1,9 +1,10 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
-  test-mapreduce kill stop principals printenv start-namenode start-datanode initialize-hdfs\
-  envquiet normaluser hdfsuser kill kill-hdfs kill-yarn kill-zookeeper report report2 sync \
-  runtest manualsync start-resourcemanager start-nodemanager
+  test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
+  envquiet normaluser hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
+  runtest manualsync start-resourcemanager start-nodemanager restart-hdfs
+# ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
-# ^^ TODO: add test-zookeeper.
+include hostnames.mk
 
 # config files that are rewritten by rewrite-config.xsl.
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
@@ -15,8 +16,6 @@ OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh services
 # TMPDIR: Should be on a filesystem big enough to do your hadoop work.
 TMPDIR=/tmp/hadoop-data
 
-#this is kind of crazy, sorry. would like a simpler way.
-MASTER=`export MASTER=\`echo \`\`hostname -f | tr "[:upper:]" "[:lower:]"\`\`\`; echo $$MASTER`
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
 ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
@@ -45,26 +44,24 @@ install: all ~/hadoop-runtime services.keytab
 ~/hadoop-runtime:
 	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
 
-stop: kill
-
-kill: kill-hdfs kill-yarn kill-zookeeper
+stop: stop-hdfs stop-yarn stop-zookeeper
 	echo
 # ^^^ need a dummy action here (e.g. an echo) to avoid default action -
-# default action is "cat kill.sh > kill", for some reason.)
+# default action is "cat stop.sh > stop", for some reason.)
 
-kill-hdfs: 
-	-sh kill.sh hdfs
+stop-hdfs: 
+	-sh stop.sh hdfs
 
-kill-yarn:
-	-sh kill.sh yarn
+stop-yarn:
+	-sh stop.sh yarn
 
-kill-nodemanager:
-	-sh kill.sh nodemanager
+stop-nodemanager:
+	-sh stop.sh nodemanager
 
-kill-zookeeper:
-	-sh kill.sh zookeeper
+stop-zookeeper:
+	-sh stop.sh zookeeper
 
-start-hdfs: kill-hdfs initialize-hdfs start-namenode start-datanode
+start-hdfs: stop-hdfs initialize-hdfs start-namenode start-secondary-namenode start-datanode
 
 initialize-hdfs:
 	-rm -rf /tmp/logs
@@ -75,10 +72,14 @@ initialize-hdfs:
 start-namenode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs namenode &
 
+start-secondary-namenode: services.keytab
+	$(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
+
+
 start-datanode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs datanode &
 
-start-yarn: kill-yarn start-resourcemanager start-nodemanager
+start-yarn: stop-yarn start-resourcemanager start-nodemanager
 
 start-resourcemanager:
 	$(HADOOP_RUNTIME)/bin/yarn resourcemanager &
@@ -89,7 +90,9 @@ start-nodemanager:
 start-zookeeper:
 	$(ZOOKEEPER_HOME)/bin/zkServer.sh start
 
-restart: kill start
+restart: stop start
+
+restart-hdfs: stop-hdfs start-hdfs
 
 start: sync services.keytab start-hdfs start-yarn start-zookeeper
 
