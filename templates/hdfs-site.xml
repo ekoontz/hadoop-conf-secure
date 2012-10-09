@@ -71,17 +71,10 @@
     <name>ignore.secure.ports.for.testing</name>
     <value>true</value>
   </property>
-
-  <property>
-    <name>dfs.web.authentication.kerberos.principal</name>
-    <value>hdfs/eugenes-macbook-pro.local@EXAMPLE.COM</value>
-  </property>
-
   <property>
     <name>dfs.namenode.internal.spnego.principal</name>
     <value>xxx</value>
   </property>
-
   <property>
     <name>dfs.web.authentication.kerberos.principal</name>
     <value>xxx</value>
