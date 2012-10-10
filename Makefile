@@ -1,6 +1,6 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
   test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
-  envquiet normaluser hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
+  envquiet login hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
   runtest manualsync start-resourcemanager start-nodemanager restart-hdfs
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
@@ -110,7 +110,7 @@ sync:
 	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
 
 # use password authentication.
-normaluser:
+login:
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM)
 
@@ -183,10 +183,10 @@ test:
 
 runtest: hdfs-test mapreduce-test
 
-test-hdfs: permissions normaluser
+test-hdfs: permissions login
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
 
-test-mapreduce: normaluser
+test-mapreduce: login
 	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
