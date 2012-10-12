@@ -86,7 +86,17 @@ below for ntp configuration on the guest VM.
 
 6. Install krb5kdc, bind and ntpdate (guest)
 
+ [root@centos1 ekoontz]# cat /etc/ntp.conf | grep ^server
+server 172.16.175.1
   [root@centos1]# yum -y install krb5-server bind ntpdate
+  [root@centos1]# chkconfig ntpd off
+  [root@centos1]# chkconfig ntpdate on
+
+We will use the host computer's ntp daemon to set the guest's date, so
+we can shut down ntpd on the guest and start ntpdate (client-only).
+
+You may also prefer to run the ntpd server on the guest, in which case
+your configuration may differ.
 
 7. Configure bind on guest VM (guest)
 
