@@ -1,7 +1,8 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
   test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
   envquiet login hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
-  runtest manualsync start-resourcemanager start-nodemanager restart-hdfs
+  runtest manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort \
+  test-terasort2 stop-secondarynamenode
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 include hostnames.mk
@@ -55,6 +56,9 @@ stop-hdfs:
 stop-yarn:
 	-sh stop.sh yarn
 
+stop-secondary-namenode:
+	-sh stop.sh secondarynamenode
+
 stop-nodemanager:
 	-sh stop.sh nodemanager
 
@@ -69,8 +73,11 @@ initialize-hdfs:
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
-start-namenode: services.keytab
+start-namenode: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs namenode &
+
+/tmp/hadoop-data/dfs/name:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
 start-secondary-namenode: services.keytab
 	$(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
@@ -151,12 +158,13 @@ report2:
 	echo " DNS:"
 	echo "  DNS_SERVER:                      $(DNS_SERVER)"
 	echo "  DNS CLIENT QUERIES:"
-	echo "   MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) $(MASTER) +short`"
-	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "   REVERSE MASTER DNS LOOKUP $(MASTER): `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
+	echo "   MASTER DNS LOOKUP: $(MASTER) => `dig @$(DNS_SERVER) $(MASTER) +short`"
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "   REVERSE MASTER DNS LOOKUP: $$MASTER_IP => `dig @$(DNS_SERVER) -x $$MASTER_IP +short`"
 	echo " DATE:"
 	echo "  MASTER DATE:                    " `date`
 	echo "  DNS_SERVER DATE:                " `ssh $(DNS_SERVER) date`
-	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo "  DEBUG DATE INFO:                " `ssh -t $(DNS_SERVER) "sudo ntpdate -d $(MASTER_IP)"`
+	echo "  DEBUG DATE INFO:"
+	export MASTER_IP=`dig @$(DNS_SERVER) $(MASTER) +short`; echo `ssh -t $(DNS_SERVER) "sudo ntpdate -d $$MASTER_IP"`
 	echo " KERBEROS:"
 	echo "  REALM:                           $(REALM)"
 	echo "  TICKET CACHE:"
@@ -167,6 +175,7 @@ report2:
 	echo ""
 	echo " HADOOP CONF:"
 	echo "  HDFS:"
+#TODO: use hadoop's 'get properties' ability rather than xpath.
 	echo "   fs.defaultFS:                    " `xpath $(HADOOP_RUNTIME)/etc/hadoop/core-site.xml "/configuration/property[name='fs.defaultFS']/value/text()" 2> /dev/null`
 	echo "   dfs.namenode.keytab.file:        " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.keytab.file']/value/text()" 2> /dev/null`
 	echo "   dfs.namenode.kerberos.principal: " `xpath $(HADOOP_RUNTIME)/etc/hadoop/hdfs-site.xml "/configuration/property[name='dfs.namenode.kerberos.principal']/value/text()" 2> /dev/null`
@@ -181,7 +190,7 @@ report2:
 test:
 	export MASTER=$(MASTER); make -s -e runtest
 
-runtest: hdfs-test mapreduce-test
+runtest: test-hdfs test-mapreduce
 
 test-hdfs: permissions login
 	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
@@ -190,6 +199,16 @@ test-mapreduce: login
 	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
 	$(HADOOP_RUNTIME)/bin/hadoop jar \
          $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
+
+test-terasort:
+	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
+	$(HADOOP_RUNTIME)/bin/hadoop jar \
+         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar teragen 10000000 hdfs://$(MASTER):8020/user/`whoami`/teragen
+	$(HADOOP_RUNTIME)/bin/hadoop jar \
+         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar terasort hdfs://$(MASTER):8020/user/`whoami`/teragen hdfs://$(MASTER):8020/user/`whoami`/terasort
+
+test-terasort2:
+	$(HADOOP_RUNTIME/bin/hadoop jar $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar teragen 100000 hdfs://$(MASTER):8020/user/`whoami`/teragen
 
 #deprecated.
 hdfs-test: test-hdfs

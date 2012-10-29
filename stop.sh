@@ -10,7 +10,10 @@ fi
 if [ $CLASS = "nodemanager" ]; then
     GREP="Nodemanager"
 fi
-#this rule will mache the secondary name node as well (since its name is "SecondaryNameNode")
+if [ $CLASS = "secondarynamenode" ]; then
+    GREP="SecondaryNameNode"
+fi
+#this rule will match the secondary name node as well as the name node (since the 2NN's name is "SecondaryNameNode")
 if [ $CLASS = "hdfs" ]; then
     GREP="DataNode\|NameNode"
 fi
