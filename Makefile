@@ -2,7 +2,7 @@
   test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
   envquiet login hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
   runtest manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort \
-  test-terasort2 stop-secondarynamenode
+  test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 include hostnames.mk
@@ -39,8 +39,11 @@ services.keytab:
 	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER)"
 	scp $(DNS_SERVER):services.keytab .
 
-install: all ~/hadoop-runtime services.keytab
+install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
+
+rm-hadoop-runtime-symlink:
+	-rm ~/hadoop-runtime
 
 ~/hadoop-runtime:
 	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
