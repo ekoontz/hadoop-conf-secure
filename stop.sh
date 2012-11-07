@@ -29,8 +29,14 @@ if [ ! -z $GREP ]; then
     APACHE_PIDS=`jps | grep $GREP | awk '{print $1}'`
 fi
 
+#TODO: also check ps, because jps doesn't necessarily find all processes..
+# https://gist.github.com/4028435
+#
+# "If jps doesn't discover a process, it doesn't mean that the Java process can't be attached or spelunked. 
+# "It just means that it isn't advertising itself as available.".
+#
+#  http://www.ibm.com/developerworks/java/library/j-5things8/index.html
 while [ -n "$APACHE_PIDS" ]; do
-
     echo "killing apache java processes.."
     for PID in $APACHE_PIDS
     do
