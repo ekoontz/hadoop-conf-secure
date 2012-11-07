@@ -22,6 +22,9 @@ ZOOKEEPER_HOME=$(HOME)/zookeeper
 REALM=EXAMPLE.COM
 KRB5_CONFIG=./krb5.conf
 DNS_SERVER=`cat hadoop-conf.sh | grep DNS_SERVERS | awk 'BEGIN {FS = "="} ; {print $$2}'`
+
+LOG=HADOOP_ROOT_LOGGER=INFO,console HADOOP_SECURITY_LOGGER=INFO,console
+
 all: $(CONFIGS)
 
 printenv:
@@ -77,34 +80,35 @@ initialize-hdfs:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
 start-namenode: services.keytab /tmp/hadoop-data/dfs/name
-	$(HADOOP_RUNTIME)/bin/hdfs namenode &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
 
 /tmp/hadoop-data/dfs/name:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
 start-secondary-namenode: services.keytab
-	$(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
-
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=secondarynamenode.log $(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
 
 start-datanode: services.keytab
-	$(HADOOP_RUNTIME)/bin/hdfs datanode &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode &
 
 start-yarn: stop-yarn start-resourcemanager start-nodemanager
 
 start-resourcemanager:
-	$(HADOOP_RUNTIME)/bin/yarn resourcemanager &
+	YARN_ROOT_LOGGER=INFO,DRFA YARN_LOGFILE=resourcemanager.log $(HADOOP_RUNTIME)/bin/yarn resourcemanager &
 
 start-nodemanager:
-	$(HADOOP_RUNTIME)/bin/yarn nodemanager &
+	YARN_ROOT_LOGGER=INFO,DRFA YARN_LOGFILE=nodemanager.log $(HADOOP_RUNTIME)/bin/yarn nodemanager &
 
 start-zookeeper:
 	$(ZOOKEEPER_HOME)/bin/zkServer.sh start
 
 restart: stop start
+	echo
 
 restart-hdfs: stop-hdfs start-hdfs
 
 start: sync services.keytab start-hdfs start-yarn start-zookeeper
+	jps
 
 start2: manualsync services.keytab start-hdfs start-yarn start-zookeeper
 
@@ -201,13 +205,13 @@ test:
 
 runtest: test-hdfs test-mapreduce
 
-test-hdfs: permissions login
-	$(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
+test-hdfs: login permissions
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
 
 test-mapreduce: login
-	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
-	$(HADOOP_RUNTIME)/bin/hadoop jar \
-         $(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop jar \
+	$(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
 
 test-terasort:
 	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
