@@ -1,8 +1,8 @@
 .PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
   test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
-  envquiet login hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync \
-  runtest manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort \
-  test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink
+  envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
+  report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
+  test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 include hostnames.mk
@@ -119,38 +119,41 @@ sync:
 	ssh -t $(DNS_SERVER) "sudo service ntpdate restart"
 	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
 
-# use password authentication.
-login:
+# uses password authentication:
+relogin: logout login
+
+logout:
 	-kdestroy
-	export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM)
-	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -R
-	export KRB5_CONFIG=$(KRB5_CONFIG); klist
+
+login:
+	klist 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM))
 
 
-# use keytab authentication.
+
+# uses keytab authentication.
 hdfsuser: services.keytab
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
 
 rmr-tmp: hdfsuser
-	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
-	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
-	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
 
 # this modifies HDFS permissions so that normal user can run jobs.
 permissions: rmr-tmp
-	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
-	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
-	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
 
-	-$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/user
-	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/user
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/user
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/user
 
-	-$(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp/yarn
-	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp/yarn
-	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp/yarn
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp/yarn
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp/yarn
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp/yarn
 
-	$(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(MASTER):8020/
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(MASTER):8020/
 
 #print some diagnostics
 report:
