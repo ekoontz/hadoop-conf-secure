@@ -3,6 +3,7 @@
   envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
   report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
   test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink
+
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 include hostnames.mk
@@ -129,10 +130,9 @@ relogin: logout login
 logout:
 	-kdestroy
 
+# check for login with klist: if it fails, login to kerberos with kinit.
 login:
-	klist 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM))
-
-
+	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM))
 
 # uses keytab authentication.
 hdfsuser: services.keytab
