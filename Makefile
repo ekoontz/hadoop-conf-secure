@@ -123,6 +123,9 @@ sync:
 login:
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM)
+	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -R
+	export KRB5_CONFIG=$(KRB5_CONFIG); klist
+
 
 # use keytab authentication.
 hdfsuser: services.keytab
