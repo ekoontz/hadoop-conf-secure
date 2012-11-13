@@ -151,16 +151,16 @@ And reverse-resolvable:
    $ dig @172.16.175.3 -x 172.168.175.1 +short
    eugenes-macbook.pro.local.
 
-4. Setup
+12. Setup
 
   make install start
 
-5. Test
+13. Test
 
   make test
 
 
-6. Diagnostics
+14. Diagnostics
 
   make report
 
