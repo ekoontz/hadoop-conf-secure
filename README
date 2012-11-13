@@ -50,29 +50,10 @@ by this "ls". Find this suffix and use it below here:
 
   ln -s hadoop-common/hadoop-dist/target/hadoop-$SUFFIX hadoop-runtime
 
-3. Create Kerberos Principals (guest)
+3. Create hadoop-conf directory if you haven't already:
 
   git clone https://github.com/ekoontz/hadoop-conf.git
 
-  Within your top-level hadoop-conf dir:
-
-  make principals
-
-You may also do:
-
-   make principals OPT1=VAL1 .. OPTn=VALn
-
-where OPT=VAL pairs look like these examples
- (defaults shown):
-
-   TMPDIR=/tmp
-   MASTER=`hostname -f`
-   HADOOP_RUNTIME=$(HOME)/hadoop-runtime
-   ZOOKEEPER_HOME=$(HOME)/zookeeper
-
-4. Copy keytab file generated from previous step from guest to host. (host)
-
-   scp IP_OF_GUEST_VM:hadoop-conf/services.keytab $HOME/hadoop-conf
 
 5. On host computer, make sure ntpd is running (host)
 
@@ -170,26 +151,22 @@ And reverse-resolvable:
    $ dig @172.16.175.3 -x 172.168.175.1 +short
    eugenes-macbook.pro.local.
 
-12. Edit $HOME/hadoop-conf/hadoop-conf.sh: set DNS_SERVERS to IP of VM on host-only network (host)
+4. Setup
 
-  export DNS_SERVERS=172.16.175.3
+  make install start
 
-13. Edit $HOME/hadoop-conf/krb5.conf: set kdc and admin_server to IP of VM on host-only network (host)
+5. Test
 
-  [realms]
-   EXAMPLE.COM = {
-    #change to ip or hostname of your kdc
-    kdc = 172.16.175.3
-    #change to ip or hostname of your admin_server
-    admin_server = 172.16.175.3
-   }
+  make test
 
-14. Install Hadoop configuration in hadoop-runtime (host)
 
-  cd ~/hadoop-conf
-  make install
+6. Diagnostics
 
-15. Sync guest clock (guest)
+  make report
+
+Notes:
+
+Syncing guest clock (guest vm)
 
   [root@centos1]# sudo service ntpdate restart; date
 
@@ -218,15 +195,3 @@ then try again on the guest OS to do:
 
    [root@centos1]# sudo ntpdate -d 172.16.175.1
 
-16. Start Hadoop (host)
-
-(You will eventually want to run this in a screen session after
-doing it a few times).
-
-  make start
-
-17. Test (host)
-
-Run a simple Map-Reduce job through the Hadoop runtime.
-
-  make test
