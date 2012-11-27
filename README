@@ -55,7 +55,7 @@ by this "ls". Find this suffix and use it below here:
   git clone https://github.com/ekoontz/hadoop-conf.git
 
 
-5. On host computer, make sure ntpd is running (host)
+4. On host computer, make sure ntpd is running (host)
 
   Eugenes-MacBook-Pro:hadoop-conf ekoontz$ ps -ef | grep ntpd
     0 81521     1   0  3:05PM ??         0:01.03 /usr/sbin/ntpd -c /private/etc/ntp-restrict.conf -n -g -p /var/run/ntpd.pid -f /var/db/ntp.drift
@@ -65,7 +65,7 @@ that the guest can keep its time in sync with the host, which is
 important for Kerberos tickets to work correctly. See also step 7
 below for ntp configuration on the guest VM.
 
-6. Install krb5kdc, bind and ntpdate (guest)
+5. Install krb5kdc, bind and ntpdate (guest)
 
  [root@centos1 ekoontz]# cat /etc/ntp.conf | grep ^server
 server 172.16.175.1
@@ -79,7 +79,7 @@ we can shut down ntpd on the guest and start ntpdate (client-only).
 You may also prefer to run the ntpd server on the guest, in which case
 your configuration may differ.
 
-7. Configure bind on guest VM (guest)
+6. Configure bind on guest VM (guest)
 
 Add the following at the bottom of /etc/named.conf:
 
@@ -112,20 +112,20 @@ Add the following as the file /var/named/local.ptr.db:
   1			IN PTR	eugenes-macbook-pro.local.
   3    			IN PTR	centos.local.
 
-8. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network (guest)
+7. On guest VM, make sure ntpdate is set to use IP of Host computer on host-only network (guest)
 I recommend that you use *only* this server as the DNS server to simplify diagnostics.
 
   [ekoontz@centos1 ~]$ cat /etc/ntp.conf | grep server
 
   server 172.16.175.1
 
-9. Start services on guest VM (guest)
+8. Start services on guest VM (guest)
 
   [root@centos1]# chkconfig krb5kdc on
   [root@centos1]# chkconfig named on
   [root@centos1]# chkconfig ntpdate on
 
-10. On guest VM, make sure bind and krb5kdc are running (guest)
+9. On guest VM, make sure bind and krb5kdc are running (guest)
 
    [ekoontz@centos1 ~]$ ps -ef | grep krb5kdc
 root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/krb5kdc.pid
@@ -133,7 +133,7 @@ root      2477     1  0 11:39 ?        00:00:00 /usr/sbin/krb5kdc -P /var/run/kr
   [ekoontz@centos1 ~]$ ps -ef | grep bind
   nobody    2815     1  0 11:39 ?        00:00:00 /usr/sbin/dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
 
-11. Test guest-run named from host (host)
+10. Test guest-run named from host (host)
 
 Both of the hostnames you added in step 6 should be resolvable:
 
@@ -151,16 +151,16 @@ And reverse-resolvable:
    $ dig @172.16.175.3 -x 172.168.175.1 +short
    eugenes-macbook.pro.local.
 
-12. Setup
+11. Setup
 
   make install start
 
-13. Test
+12. Test
 
   make test
 
 
-14. Diagnostics
+13. Diagnostics
 
   make report
 
