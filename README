@@ -166,6 +166,37 @@ And reverse-resolvable:
 
 Notes:
 
+If you do:
+  
+  make login
+
+and get something like:
+
+  kinit: krb5_get_init_creds: time skew (41863) larger than max (300)
+
+, it is likely that your KDC's time is behind the Master's time. 
+
+Check using:
+
+  make report
+
+and look for MASTER DATE: and DNS_SERVER DATE:. (Note that the report
+shows DNS_SERVER, but if you are using this setup, the KDC should be
+running on the same machine as the DNS_SERVER).
+
+If the two DATEs are not in sync, the master's time will be the more
+accurate since it is running directly on your computer, not on a VM.
+
+To fix the date skew, run:
+
+   make sync
+
+Then try "make report" to verify that the MASTER DATE: and DNS_SERVER
+DATE: are the same (a second or two difference is ok). Now "make login"
+should work also.
+
+If the DNS_SERVER DATE is still out of sync, read below.
+
 Syncing guest clock (guest vm)
 
   [root@centos1]# sudo service ntpdate restart; date
