@@ -2,7 +2,8 @@
   test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
   envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
   report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
-  test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink
+  test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink \
+  ha-install start-jn
 
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
@@ -10,6 +11,7 @@ include hostnames.mk
 
 # config files that are rewritten by rewrite-config.xsl.
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
+HA_CONFIGS=hdfs-site-ha.xml
 
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
@@ -28,6 +30,17 @@ LOG=HADOOP_ROOT_LOGGER=INFO,console HADOOP_SECURITY_LOGGER=INFO,console
 
 all: $(CONFIGS)
 
+ha-config: ha-hdfs-site.xml
+
+ha-hdfs-site.xml: templates/ha-hdfs-site.xsl hdfs-site.xml 
+	DNS_SERVER_NAME=centos1.local \
+        MASTER=$(MASTER) \
+	xsltproc --stringparam cluster 'ekoontz1' \
+		 --stringparam master 'eugenes-macbook-pro.local' \
+		 --stringparam nn_failover 'centos1.local' \
+		 --stringparam jn1 'eugenes-macbook-pro.local' \
+		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
+
 printenv:
 	make -s -e envquiet
 
@@ -45,6 +58,9 @@ services.keytab:
 
 install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
+
+ha-install: install ha-hdfs-site.xml
+	cp ha-hdfs-site.xml ~/hadoop-runtime/etc/hadoop/hdfs-site.xml
 
 rm-hadoop-runtime-symlink:
 	-rm ~/hadoop-runtime
@@ -81,7 +97,37 @@ initialize-hdfs:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
 start-namenode: services.keytab /tmp/hadoop-data/dfs/name
-	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
+	touch $(HADOOP_RUNTIME)/logs/namenode.log
+	echo "logging to $(HADOOP_RUNTIME)/logs/namenode.log"
+	tail -f $(HADOOP_RUNTIME)/logs/namenode.log &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
+
+start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
+	touch $(HADOOP_RUNTIME)/logs/namenode.log
+	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
+	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
+
+format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
+	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
+
+start-zk: services.keytab /tmp/hadoop-data/dfs/name
+	~/zookeeper/bin/zkServer.sh start-foreground
+
+stop-namenode:
+	kill `jps | grep NameNode | awk '{print $$1}'`
+
+init-jn:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
+
+start-jn: services.keytab /tmp/hadoop-data/dfs/name
+	touch $(HADOOP_RUNTIME)/logs/journalnode.log
+	echo "logging to: $(HADOOP_RUNTIME)/logs/journalnode.log"
+	tail -f $(HADOOP_RUNTIME)/logs/journalnode.log &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode
+
+stop-jn:
+	kill `jps | grep JournalNode | awk '{print $$1}'`
 
 /tmp/hadoop-data/dfs/name:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
@@ -90,7 +136,13 @@ start-secondary-namenode: services.keytab
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=secondarynamenode.log $(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
 
 start-datanode: services.keytab
-	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode &
+	touch $(HADOOP_RUNTIME)/logs/datanode.log
+	echo "logging to $(HADOOP_RUNTIME)/logs/datanode.log"
+	tail -f $(HADOOP_RUNTIME)/logs/datanode.log &
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode
+
+stop-datanode:
+	kill `jps | grep DataNode | awk '{print $1}'`
 
 start-yarn: stop-yarn start-resourcemanager start-nodemanager
 
@@ -199,6 +251,8 @@ report2:
 	echo "   yarn.resourcemanager.principal:  " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.resourcemanager.principal']/value/text()" 2> /dev/null`
 	echo "   yarn.nodemanager.keytab:         " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.keytab']/value/text()" 2> /dev/null`
 	echo "   yarn.nodemanager.principal:      " `xpath $(HADOOP_RUNTIME)/etc/hadoop/yarn-site.xml "/configuration/property[name='yarn.nodemanager.principal']/value/text()" 2> /dev/null`
+	echo " JPS (Java processes running):"
+	echo `jps`
 
 test:
 	export MASTER=$(MASTER); make -s -e runtest
