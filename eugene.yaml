@@ -1,0 +1,10 @@
+nn1: eugenes-macbook-pro.local
+nn2: centos1.local
+dn1: eugenes-macbook-pro.local
+zk:  eugenes-macbook-pro.local
+nn1log: /Users/ekoontz/hadoop-runtime/logs/namenode.log
+nn2log: /home/ekoontz/hadoop-runtime/logs/namenode.log
+dn1log: /Users/ekoontz/hadoop-runtime/logs/datanode.log
+zkfc1log: /Users/ekoontz/hadoop-runtime/logs/zkfc.log
+zkfc2log: /home/ekoontz/hadoop-runtime/logs/zkfc.log
+jnlog: /Users/ekoontz/hadoop-runtime/logs/journalnode.log
