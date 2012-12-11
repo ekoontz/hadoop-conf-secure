@@ -154,6 +154,15 @@ format-jn:
 	rm -rf /tmp/hadoop/dfs/jn
 	mkdir /tmp/hadoop/dfs/jn
 	find /tmp/hadoop/dfs/jn -ls
+	rm -rf /tmp/hadoop-data/dfs/jn
+	mkdir /tmp/hadoop-data/dfs/jn
+	find /tmp/hadoop-data/dfs/jn -ls
+	rm -rf /tmp/hadoop/dfs/journalnode
+	mkdir /tmp/hadoop/dfs/journalnode
+	find /tmp/hadoop/dfs/journalnode -ls
+	rm -rf /tmp/hadoop/dfs/journalnode
+	mkdir /tmp/hadoop/dfs/journalnode
+	find /tmp/hadoop/dfs/journalnode -ls
 
 #adding '/tmp/hadoop/dfs/name' as a dep causes a cycle because it will try to 
 #do 'namenode -format' to create /tmp/hadoop/dfs/name. Then the namenode tries
