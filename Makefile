@@ -171,6 +171,8 @@ stop-namenode:
 init-jn:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
 
+format-and-start-jn: format-jn start-jn
+
 format-jn:
 	rm -rf /tmp/hadoop/dfs/jn
 	mkdir /tmp/hadoop/dfs/jn
@@ -422,6 +424,8 @@ build:
 	pushd . && cd ~/hadoop-common && mvn -Pdist -DskipTests package && popd
 
 format-and-start-master: format-master start-nn
+
+format-and-start-dn: format-dn start-dn
 
 format-master:
 	~/hadoop-runtime/bin/hdfs namenode -format -force
