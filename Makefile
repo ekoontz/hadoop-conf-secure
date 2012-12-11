@@ -113,7 +113,10 @@ start-nn: start-namenode
 bootstrap-host-by-guest:
 	-rm -rf /tmp/hadoop-data/dfs/name
 	mkdir -p /tmp/hadoop-data/dfs/name
+	-rm -rf /tmp/hadoop/dfs/name
+	mkdir -p /tmp/hadoop/dfs/name
 	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop-data/dfs/name
+	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
