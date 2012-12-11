@@ -152,6 +152,9 @@ start-namenode: services.keytab /tmp/hadoop-data/dfs/name
 start-nn-b: services.keytab /tmp/hadoop-data/dfs/name
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
 
+
+restart-zkfc: stop-zkfc start-zkfc
+
 start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
@@ -159,6 +162,7 @@ start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
 stop-zkfc:
+	-kill `jps | grep DFSZKFailoverController | awk '{print $$1}'`
 
 format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
