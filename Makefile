@@ -96,23 +96,49 @@ initialize-hdfs:
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
+bootstrap-host-by-guest:
+	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
+#someday instead of the above we will simply do:
+#       hdfs namenode -bootstrapStandby
+
+bootstrap-guest-by-host:
+	rm -rf /tmp/hadoop-data/dfs/name
+	mkdir -p /tmp/hadoop-data/dfs/name/current
+	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name /tmp/hadoop-data/dfs/name/current
+#someday instead of the above we will simply do:
+#       hdfs namenode -bootstrapStandby
+
 start-namenode: services.keytab /tmp/hadoop-data/dfs/name
 	touch $(HADOOP_RUNTIME)/logs/namenode.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/namenode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/namenode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
 
+start-nn-b: services.keytab /tmp/hadoop-data/dfs/name
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
+
 start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
-	touch $(HADOOP_RUNTIME)/logs/namenode.log
+	touch $(HADOOP_RUNTIME)/logs/zkfc.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
 	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
+
+start-zkfc-b: services.keytab /tmp/hadoop-data/dfs/name
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc &
 
 format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
 
 start-zk: services.keytab /tmp/hadoop-data/dfs/name
 	~/zookeeper/bin/zkServer.sh start-foreground
+
+format-nn-master:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
+
+format-nn-failover:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -format -clusterid ekoontz1 -force
+
+start-nn: start-namenode
 
 stop-namenode:
 	kill `jps | grep NameNode | awk '{print $$1}'`
@@ -307,3 +333,14 @@ yarn-site.xml: templates/yarn-site.xml
 	         --stringparam realm $(REALM) \
 	         --stringparam homedir `echo $$HOME` rewrite-config.xsl $^ | xmllint --format - > $@
 
+prep-active-for-sb-bootstrap:
+	~/hadoop-runtime/bin/hdfs dfsadmin -safemode enter
+	~/hadoop-runtime/bin/hdfs dfsadmin -saveNamespace
+
+build:
+	pushd . && cd ~/hadoop-common && mvn -Pdist -DskipTests package && popd
+
+format-and-start-master: format-master start-nn
+
+format-master:
+	~/hadoop-runtime/bin/hdfs namenode -format -force
