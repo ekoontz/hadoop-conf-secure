@@ -130,7 +130,7 @@ start-namenode: services.keytab /tmp/hadoop-data/dfs/name
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
 
 start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
-	touch $(HADOOP_RUNTIME)/logs/namenode.log
+	touch $(HADOOP_RUNTIME)/logs/zkfc.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
 	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
