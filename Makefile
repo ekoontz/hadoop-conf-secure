@@ -39,6 +39,15 @@ ha-hdfs-site.xml: templates/ha-hdfs-site.xsl hdfs-site.xml
 		 --stringparam jn1 'eugenes-macbook-pro.local' \
 		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
 
+ha-core-site.xml: templates/ha-core-site.xsl core-site.xml
+	DNS_SERVER_NAME=centos1.local \
+        MASTER=$(MASTER) \
+	xsltproc --stringparam cluster 'ekoontz1' \
+		 --stringparam master 'eugenes-macbook-pro.local' \
+		 --stringparam nn_failover 'centos1.local' \
+		 --stringparam jn1 'eugenes-macbook-pro.local' \
+		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
+
 printenv:
 	make -s -e envquiet
 
@@ -57,8 +66,11 @@ services.keytab:
 install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
+install-ha: ha-install
+
 ha-install: install ha-hdfs-site.xml ~/hadoop-runtime/logs
 	cp ha-hdfs-site.xml ~/hadoop-runtime/etc/hadoop/hdfs-site.xml
+	cp ha-core-site.xml ~/hadoop-runtime/etc/hadoop/core-site.xml
 
 rm-hadoop-runtime-symlink:
 	-rm ~/hadoop-runtime
