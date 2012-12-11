@@ -15,7 +15,8 @@ CLUSTER=ekoontz1
 # xsl-and-copied.
 OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh services.keytab
 
-# TMPDIR: Should be on a filesystem big enough to do your hadoop work.
+# TMPDIR: Should be on a filesystem big enough to do hadoop testing/dev. All
+# Used for namenode and datanode storage.
 TMPDIR=/tmp/hadoop-data
 
 HADOOP_RUNTIME=$(HOME)/hadoop-runtime
