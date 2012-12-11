@@ -3,7 +3,7 @@
   envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
   report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
   test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink \
-  ha-install start-jn build
+  ha-install start-jn build clean-logs
 
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
@@ -425,3 +425,6 @@ format-and-start-dn: format-dn start-dn
 
 format-master:
 	~/hadoop-runtime/bin/hdfs namenode -format -force
+
+clean-logs:
+	rm ~/hadoop-runtime/logs/*
