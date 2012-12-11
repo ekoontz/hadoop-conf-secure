@@ -78,8 +78,9 @@ rm-hadoop-runtime-symlink:
 ~/hadoop-runtime/logs:
 	mkdir ~/hadoop-runtime/logs
 
+#note 'head -n 1': in case of multiple directories in hadoop-dist/target, just take first one.
 ~/hadoop-runtime:
-	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
+	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1 |head -n 1` $(HOME)/hadoop-runtime
 
 stop: stop-hdfs stop-yarn stop-zookeeper
 	echo
