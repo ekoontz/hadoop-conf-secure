@@ -128,16 +128,20 @@ start-standby-nn-on-host: bootstrap-host-by-guest start-nn
 format-and-start-jn: format-jn start-jn
 
 bootstrap-guest-by-host:
-	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name/current /tmp/hadoop-data/dfs/name
+	rm -rf /tmp/hadoop-data/dfs/name
+	mkdir -p /tmp/hadoop-data/dfs/name/current
+	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name /tmp/hadoop-data/dfs/name/current
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
-
 
 start-namenode: services.keytab /tmp/hadoop-data/dfs/name
 	touch $(HADOOP_RUNTIME)/logs/namenode.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/namenode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/namenode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
+
+start-nn-b: services.keytab /tmp/hadoop-data/dfs/name
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
 
 start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log
@@ -146,13 +150,20 @@ start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
 stop-zkfc:
-	kill `jps | grep DFSZKFailoverController | awk '{print $$1}'`
 
 format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
 
 start-zk: services.keytab /tmp/hadoop-data/dfs/name
 	~/zookeeper/bin/zkServer.sh start-foreground
+
+format-nn-master:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
+
+format-nn-failover:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -format -clusterid ekoontz1 -force
+
+start-nn: start-namenode
 
 stop-namenode:
 	kill `jps | grep NameNode | awk '{print $$1}'`
@@ -403,7 +414,14 @@ yarn-site.xml: templates/yarn-site.xml
 	         --stringparam realm $(REALM) \
 	         --stringparam homedir `echo $$HOME` rewrite-config.xsl $^ | xmllint --format - > $@
 
+prep-active-for-sb-bootstrap:
+	~/hadoop-runtime/bin/hdfs dfsadmin -safemode enter
+	~/hadoop-runtime/bin/hdfs dfsadmin -saveNamespace
 
 build:
 	pushd . && cd ~/hadoop-common && mvn -Pdist -DskipTests package && popd
 
+format-and-start-master: format-master start-nn
+
+format-master:
+	~/hadoop-runtime/bin/hdfs namenode -format -force
