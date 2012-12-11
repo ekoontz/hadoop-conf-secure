@@ -69,7 +69,7 @@ install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop
 
 install-ha: ha-install
 
-ha-install: install ha-hdfs-site.xml ~/hadoop-runtime/logs
+ha-install: install ha-hdfs-site.xml ha-core-site.xml ~/hadoop-runtime/logs
 	cp ha-hdfs-site.xml ~/hadoop-runtime/etc/hadoop/hdfs-site.xml
 	cp ha-core-site.xml ~/hadoop-runtime/etc/hadoop/core-site.xml
 
