@@ -3,16 +3,14 @@
   envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
   report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
   test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink \
-  ha-install start-jn
+  ha-install start-jn build
 
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
-
-include hostnames.mk
 
 # config files that are rewritten by rewrite-config.xsl.
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
 HA_CONFIGS=hdfs-site-ha.xml
-
+CLUSTER=ekoontz1
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
 OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh services.keytab
@@ -56,14 +54,17 @@ services.keytab:
 	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER)"
 	scp $(DNS_SERVER):services.keytab .
 
-install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab
+install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
 
-ha-install: install ha-hdfs-site.xml
+ha-install: install ha-hdfs-site.xml ~/hadoop-runtime/logs
 	cp ha-hdfs-site.xml ~/hadoop-runtime/etc/hadoop/hdfs-site.xml
 
 rm-hadoop-runtime-symlink:
 	-rm ~/hadoop-runtime
+
+~/hadoop-runtime/logs:
+	mkdir ~/hadoop-runtime/logs
 
 ~/hadoop-runtime:
 	ln -s `find $(HOME)/hadoop-common/hadoop-dist/target -name "hadoop*"  -type d -maxdepth 1` $(HOME)/hadoop-runtime
@@ -96,8 +97,23 @@ initialize-hdfs:
 	rm -rf $(TMPDIR)
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
+format-nn: initialize-hdfs
+
+format-dn:
+	rm -rf /tmp/hadoop-data/dfs/data
+
+format-nn-master:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
+
+format-nn-failover:
+	$(HADOOP_RUNTIME)/bin/hdfs namenode -format -clusterid ekoontz1 -force
+
+start-nn: start-namenode
+
 bootstrap-host-by-guest:
-	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
+	-rm -rf /tmp/hadoop-data/dfs/name
+	mkdir -p /tmp/hadoop-data/dfs/name
+	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop-data/dfs/name
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
@@ -123,8 +139,7 @@ start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
-start-zkfc-b: services.keytab /tmp/hadoop-data/dfs/name
-	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc &
+stop-zkfc:
 
 format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
@@ -146,26 +161,43 @@ stop-namenode:
 init-jn:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
 
-start-jn: services.keytab /tmp/hadoop-data/dfs/name
+format-jn:
+	rm -rf /tmp/hadoop/dfs/jn
+	mkdir /tmp/hadoop/dfs/jn
+	find /tmp/hadoop/dfs/jn -ls
+
+#adding '/tmp/hadoop/dfs/name' as a dep causes a cycle because it will try to 
+#do 'namenode -format' to create /tmp/hadoop/dfs/name. Then the namenode tries
+#start-jn: services.keytab /tmp/hadoop/dfs/name
+start-jn: services.keytab
 	touch $(HADOOP_RUNTIME)/logs/journalnode.log
 	echo "logging to: $(HADOOP_RUNTIME)/logs/journalnode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/journalnode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode
 
+start-jn-b: services.keytab
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode &
+
 stop-jn:
 	kill `jps | grep JournalNode | awk '{print $$1}'`
 
-/tmp/hadoop-data/dfs/name:
+/tmp/hadoop/dfs/name:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -format
 
 start-secondary-namenode: services.keytab
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=secondarynamenode.log $(HADOOP_RUNTIME)/bin/hdfs secondarynamenode &
+
+start-dn: start-datanode
+stop-dn: stop-datanode
 
 start-datanode: services.keytab
 	touch $(HADOOP_RUNTIME)/logs/datanode.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/datanode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/datanode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode
+
+start-dn-b: services.keytab
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode &
 
 stop-datanode:
 	kill `jps | grep DataNode | awk '{print $1}'`
@@ -222,6 +254,11 @@ rmr-tmp: hdfsuser
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(MASTER):8020/tmp
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(MASTER):8020/tmp
 
+rmr-tmp-ha: hdfsuser
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(CLUSTER):8020/tmp
+
 # this modifies HDFS permissions so that normal user can run jobs.
 permissions: rmr-tmp
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
@@ -237,9 +274,23 @@ permissions: rmr-tmp
 
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(MASTER):8020/
 
+permissions-ha: rmr-tmp-ha
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(CLUSTER):8020/tmp
+
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/user
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(CLUSTER):8020/user
+
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/tmp/yarn
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/tmp/yarn
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(CLUSTER):8020/tmp/yarn
+
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(CLUSTER):8020/
+
 #print some diagnostics
 report:
-	export MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER) HADOOP_RUNTIME=$(HADOOP_RUNTIME); make -s -e report2
+	export CLUSTER=$(CLUSTER) MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER) HADOOP_RUNTIME=$(HADOOP_RUNTIME); make -s -e report2
 
 report2:
 	echo " HOSTS:"
@@ -287,6 +338,17 @@ runtest: test-hdfs test-mapreduce
 
 test-hdfs: login permissions
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
+
+test-hdfs-ha: login permissions-ha
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://ekoontz1:8020/
+
+#test hdfs HA, but no login or permissions-checking: faster.
+test-hdfs-han: 
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(CLUSTER):8020/
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/tmp/*
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/tmp/
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -copyFromLocal ~/hadoop-runtime/logs/* hdfs://$(CLUSTER):8020/tmp
+	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(CLUSTER):8020/
 
 test-mapreduce: login
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
