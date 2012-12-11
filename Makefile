@@ -117,6 +117,13 @@ bootstrap-host-by-guest:
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
+format-and-start-master-on-guest:
+	~/hadoop-runtime/bin/hdfs namenode -format -force
+
+start-standby-nn-on-host: bootstrap-host-by-guest start-nn
+
+format-and-start-jn: format-jn start-jn
+
 bootstrap-guest-by-host:
 	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name/current /tmp/hadoop-data/dfs/name
 #someday instead of the above we will simply do:
