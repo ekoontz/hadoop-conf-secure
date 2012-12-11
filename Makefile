@@ -102,13 +102,23 @@ format-nn: initialize-hdfs
 format-dn:
 	rm -rf /tmp/hadoop-data/dfs/data
 
-format-nn-master:
-	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
-
-format-nn-failover:
-	$(HADOOP_RUNTIME)/bin/hdfs namenode -format -clusterid ekoontz1 -force
-
 start-nn: start-namenode
+
+format-and-start-master:
+	~/hadoop-runtime/bin/hdfs namenode -format -force
+
+start-standby-nn-on-host: bootstrap-host-by-guest start-nn
+
+start-standby-nn-on-guest: bootstrap-guest-by-host start-nn
+
+format-and-start-jn: format-jn start-jn
+
+bootstrap-guest-by-host:
+	-rm -rf /tmp/hadoop-data/dfs/name
+	mkdir -p /tmp/hadoop-data/dfs/name
+	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name /tmp/hadoop-data/dfs/name/current
+#someday instead of the above we will simply do:
+#       hdfs namenode -bootstrapStandby
 
 bootstrap-host-by-guest:
 	-rm -rf /tmp/hadoop-data/dfs/name
@@ -117,20 +127,6 @@ bootstrap-host-by-guest:
 	mkdir -p /tmp/hadoop/dfs/name
 	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop-data/dfs/name
 	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
-#someday instead of the above we will simply do:
-#       hdfs namenode -bootstrapStandby
-
-format-and-start-master-on-guest:
-	~/hadoop-runtime/bin/hdfs namenode -format -force
-
-start-standby-nn-on-host: bootstrap-host-by-guest start-nn
-
-format-and-start-jn: format-jn start-jn
-
-bootstrap-guest-by-host:
-	rm -rf /tmp/hadoop-data/dfs/name
-	mkdir -p /tmp/hadoop-data/dfs/name/current
-	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name /tmp/hadoop-data/dfs/name/current
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
