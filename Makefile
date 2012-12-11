@@ -115,8 +115,8 @@ format-and-start-jn: format-jn start-jn
 
 bootstrap-guest-by-host:
 	-rm -rf /tmp/hadoop-data/dfs/name
-	mkdir -p /tmp/hadoop-data/dfs/name
-	scp -r eugenes-macbook-pro.local:/tmp/hadoop/dfs/name /tmp/hadoop-data/dfs/name/current
+	mkdir -p /tmp/hadoop-data/dfs
+	scp -r eugenes-macbook-pro.local:/tmp/hadoop-data/dfs/name /tmp/hadoop-data/dfs
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
