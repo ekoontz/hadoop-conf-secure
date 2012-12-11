@@ -24,7 +24,7 @@ zk = conf['zk']
 
 write_term_script "terms.scpt", [
                                  [conf['nn1'], conf['jnlog'],    "{250,1825,1500,540}", "jn",
-                                  "cd hadoop-conf && make format-and-start-jn"],
+                                  "cd hadoop-conf && make clean-logs format-and-start-jn"],
 
                                  [conf['zk'],  nil,              "{1350,475,1800,420}", "zk",
                                   "cd hadoop-conf && make start-zk"],
@@ -42,7 +42,7 @@ write_term_script "terms.scpt", [
                                   "ssh #{nn2} '. .bash_profile && cd hadoop-conf && make stop && make clean-logs && make start-zkfc'"],
 
                                  [conf['nn2'], conf['nn2log'],   "{250,2275,1500,660}", "nn2",
-                                  "ssh #{nn2} '. .bash_profile && cd hadoop-conf && sleep 30 && make start-standby-nn-on-guest'"]
+                                  "ssh #{nn2} '. .bash_profile && cd hadoop-conf && sleep 20 && make start-standby-nn-on-guest'"]
 
 
                                 ]
