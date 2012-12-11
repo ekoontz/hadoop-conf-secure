@@ -9,6 +9,10 @@ load 'scpt.rb'
 # usage: terms.rb <configfile.yaml>
 # see example.yaml for an example config file.
 
+if ARGV.size == 0
+  abort "usage: terms.rb <configfile.yaml>"
+end
+
 conf = YAML.load_file ARGV.shift
 
 nn1 = conf['nn1']
