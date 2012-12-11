@@ -144,7 +144,7 @@ bootstrap-host-by-guest:
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
-start-namenode: services.keytab /tmp/hadoop-data/dfs/name
+start-namenode: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/namenode.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/namenode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/namenode.log &
@@ -156,7 +156,7 @@ start-nn-b: services.keytab /tmp/hadoop-data/dfs/name
 
 restart-zkfc: stop-zkfc start-zkfc
 
-start-zkfc: services.keytab /tmp/hadoop-data/dfs/name
+start-zkfc: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
 	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
@@ -204,7 +204,7 @@ format-jn:
 #adding '/tmp/hadoop/dfs/name' as a dep causes a cycle because it will try to 
 #do 'namenode -format' to create /tmp/hadoop/dfs/name. Then the namenode tries
 #start-jn: services.keytab /tmp/hadoop/dfs/name
-start-jn: services.keytab
+start-jn: services.keytab $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/journalnode.log
 	echo "logging to: $(HADOOP_RUNTIME)/logs/journalnode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/journalnode.log &
@@ -225,7 +225,7 @@ start-secondary-namenode: services.keytab
 start-dn: start-datanode
 stop-dn: stop-datanode
 
-start-datanode: services.keytab
+start-datanode: services.keytab  $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/datanode.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/datanode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/datanode.log &
