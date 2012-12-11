@@ -25,7 +25,7 @@ fi
 
 if [ -z $CLASS ]; then
     echo "killing HDFS, YARN, and ZK."
-    GREP="DataNode\|NameNode\|NodeManager\|ResourceManager\|QuorumPeerMain"
+    GREP="DataNode\|NameNode\|NodeManager\|ResourceManager\|QuorumPeerMain\|DFSZKFailoverController\|JournalNode"
 else
     if [ $CLASS = "yarn" ]; then
 	GREP="NodeManager\|ResourceManager"
@@ -41,7 +41,7 @@ else
     fi
 #this rule will match the secondary name node as well as the name node (since the 2NN's name is "SecondaryNameNode")
     if [ $CLASS = "hdfs" ]; then
-	GREP="DataNode\|NameNode"
+	GREP="DataNode\|NameNode\|DFSZKFailoverController\|JournalNode"
     fi
     if [ $CLASS = "zookeeper" ]; then
 	GREP="QuorumPeerMain"
