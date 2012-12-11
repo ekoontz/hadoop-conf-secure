@@ -8,7 +8,7 @@
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 # config files that are rewritten by rewrite-config.xsl.
-CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml
+CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml ha-hdfs-site.xml ha-core-site.xml
 HA_CONFIGS=hdfs-site-ha.xml
 CLUSTER=ekoontz1
 # config files that only need to be copied rather than modified-by-
