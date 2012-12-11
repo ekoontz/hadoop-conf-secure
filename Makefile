@@ -11,6 +11,8 @@
 CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml ha-hdfs-site.xml ha-core-site.xml
 HA_CONFIGS=hdfs-site-ha.xml
 CLUSTER=ekoontz1
+MASTER=$(CLUSTER)
+MASTER_HOST=`hostname -f | tr  '[:upper:]' '[:lower:]'`
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
 OTHER_CONFIGS=log4j.properties hadoop-env.sh yarn-env.sh hadoop-conf.sh services.keytab
@@ -282,7 +284,7 @@ login:
 # uses keytab authentication.
 hdfsuser: services.keytab
 	-kdestroy
-	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER)@$(REALM)
+	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER_HOST)@$(REALM)
 
 rmr-tmp: hdfsuser
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
