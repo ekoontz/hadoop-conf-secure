@@ -39,7 +39,7 @@ write_term_script "terms.scpt", [
                                   "cd hadoop-conf && make format-and-start-master"],
 
                                  [conf['nn2'], conf['zkfc2log'], "{250,2725,1500,780}", "zkfc2",
-                                  "ssh #{nn2} '. .bash_profile && cd hadoop-conf && make stop && make start-zkfc'"],
+                                  "ssh #{nn2} '. .bash_profile && cd hadoop-conf && make stop && make clean-logs && make start-zkfc'"],
 
                                  [conf['nn2'], conf['nn2log'],   "{250,2275,1500,660}", "nn2",
                                   "ssh #{nn2} '. .bash_profile && cd hadoop-conf && sleep 30 && make start-standby-nn-on-guest'"]
