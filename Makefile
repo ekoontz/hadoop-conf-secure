@@ -282,8 +282,8 @@ logout:
 	-kdestroy
 
 # check for login with klist: if it fails, login to kerberos with kinit.
-login:
-	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kinit `whoami`@$(REALM))
+login: logout
+	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kdestroy; kinit `whoami`@$(REALM))
 
 # uses keytab authentication.
 hdfsuser: services.keytab
@@ -297,6 +297,7 @@ rmr-tmp: hdfsuser
 
 rmr-tmp-ha: hdfsuser
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/tmp
+	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(CLUSTER):8020/home/hdfs/*
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -mkdir hdfs://$(CLUSTER):8020/tmp
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 hdfs://$(CLUSTER):8020/tmp
 
@@ -377,11 +378,8 @@ test:
 
 runtest: test-hdfs test-mapreduce
 
-test-hdfs: login permissions
+test-hdfs: permissions
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://$(MASTER):8020/
-
-test-hdfs-ha: login permissions-ha
-	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls hdfs://ekoontz1:8020/
 
 #test hdfs HA, but no login or permissions-checking: faster.
 test-hdfs-han: 
@@ -391,7 +389,7 @@ test-hdfs-han:
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -copyFromLocal ~/hadoop-runtime/logs/* hdfs://$(CLUSTER):8020/tmp
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -ls -R hdfs://$(CLUSTER):8020/
 
-test-mapreduce: login
+test-mapreduce: relogin
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/user/`whoami`/*
 	$(LOG) $(HADOOP_RUNTIME)/bin/hadoop jar \
 	$(HADOOP_RUNTIME)/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar pi 5 5
