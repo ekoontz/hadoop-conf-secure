@@ -3,7 +3,7 @@
   envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
   report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
   test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink \
-  ha-install start-jn build clean-logs terms
+  ha-install start-jn build clean-logs terms stop-on-guest touch-logs touch-logs-on-guest
 
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
@@ -12,6 +12,7 @@ CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml ha-hdfs-site.x
 HA_CONFIGS=hdfs-site-ha.xml
 CLUSTER=ekoontz1
 MASTER=$(CLUSTER)
+GUEST=centos1.local
 MASTER_HOST=`hostname -f | tr  '[:upper:]' '[:lower:]'`
 # config files that only need to be copied rather than modified-by-
 # xsl-and-copied.
@@ -34,20 +35,20 @@ all: $(CONFIGS)
 ha-config: ha-hdfs-site.xml
 
 ha-hdfs-site.xml: templates/ha-hdfs-site.xsl hdfs-site.xml 
-	DNS_SERVER_NAME=centos1.local \
+	DNS_SERVER_NAME=$(GUEST) \
         MASTER=$(MASTER) \
 	xsltproc --stringparam cluster 'ekoontz1' \
 		 --stringparam master 'eugenes-macbook-pro.local' \
-		 --stringparam nn_failover 'centos1.local' \
+		 --stringparam nn_failover '$(GUEST)' \
 		 --stringparam jn1 'eugenes-macbook-pro.local' \
 		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
 
 ha-core-site.xml: templates/ha-core-site.xsl core-site.xml
-	DNS_SERVER_NAME=centos1.local \
+	DNS_SERVER_NAME=$(GUEST) \
         MASTER=$(MASTER) \
 	xsltproc --stringparam cluster 'ekoontz1' \
 		 --stringparam master 'eugenes-macbook-pro.local' \
-		 --stringparam nn_failover 'centos1.local' \
+		 --stringparam nn_failover '$(GUEST)' \
 		 --stringparam jn1 'eugenes-macbook-pro.local' \
 		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
 
@@ -89,6 +90,9 @@ stop: stop-hdfs stop-yarn stop-zookeeper
 	echo
 # ^^^ need a dummy action here (e.g. an echo) to avoid default action -
 # default action is "cat stop.sh > stop", for some reason.)
+
+stop-on-guest:
+	ssh $(GUEST) "cd hadoop-conf && make stop"
 
 stop-hdfs: 
 	-sh stop.sh hdfs
@@ -141,8 +145,8 @@ bootstrap-host-by-guest:
 	mkdir -p /tmp/hadoop-data/dfs/name
 	-rm -rf /tmp/hadoop/dfs/name
 	mkdir -p /tmp/hadoop/dfs/name
-	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop-data/dfs/name
-	scp -r centos1.local:/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
+	scp -r $(GUEST):/tmp/hadoop-data/dfs/name/current /tmp/hadoop-data/dfs/name
+	scp -r $(GUEST):/tmp/hadoop-data/dfs/name/current /tmp/hadoop/dfs/name
 #someday instead of the above we will simply do:
 #       hdfs namenode -bootstrapStandby
 
@@ -161,7 +165,7 @@ restart-zkfc: stop-zkfc start-zkfc
 start-zkfc: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log
 	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
-	tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
+	touch $(HADOOP_RUNTIME)/logs/zkfc.log && tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
 stop-zkfc:
@@ -449,7 +453,14 @@ format-master:
 clean-logs:
 	-rm ~/hadoop-runtime/logs/*
 
-terms: terms.rb
+touch-logs:
+	touch ~/hadoop-runtime/logs/datanode.log ~/hadoop-runtime/logs/zkfc.log 
+
+touch-logs-on-guest:
+	ssh $(GUEST) "cd hadoop-conf && make touch-logs"
+
+
+terms: stop stop-on-guest sync touch-logs touch-logs-on-guest terms.rb
 	./terms.rb eugene.yaml
 	./terms.scpt
 
