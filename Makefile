@@ -1,9 +1,26 @@
-.PHONY=all clean install start restart start-yarn start-hdfs start-zookeeper test test-hdfs \
-  test-mapreduce stop principals printenv start-namenode start-datanode initialize-hdfs\
-  envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report \
-  report2 sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs \
-  test-terasort test-terasort2 stop-secondarynamenode rm-hadoop-runtime-symlink \
-  ha-install start-jn build clean-logs terms stop-on-guest touch-logs touch-logs-on-guest
+#
+# known to work:
+#
+# make stop sync format-zk format-jn start-hdfs-ha hdfs-test 
+#  (type password)
+#  then:
+# make start-yarn test-mapreduce
+#  (type password)
+#
+#  then:
+# make hbase-setup
+#
+#  then:
+# cd ~/hbase-runtime
+# bin/hbase master start &
+# bin/hbase regionserver start &
+
+.PHONY=all clean install start restart start-hdfs start-zookeeper test test-hdfs test-mapreduce \
+stop principals printenv start-namenode start-namenode-bg start-datanode start-datanode-bg initialize-hdfs \
+envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync runtest \
+manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort test-terasort2 \
+stop-secondarynamenode rm-hadoop-runtime-symlink ha-install start-jn build clean-logs terms stop-on-guest \
+touch-logs touch-logs-on-guest start-ha ha start-hdfs-ha start-yarn stop-yarn restart-yarn hdfs-login
 
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
@@ -31,6 +48,10 @@ DNS_SERVER=`cat hadoop-conf.sh | grep DNS_SERVERS | awk 'BEGIN {FS = "="} ; {pri
 LOG=HADOOP_ROOT_LOGGER=INFO,console HADOOP_SECURITY_LOGGER=INFO,console
 
 all: $(CONFIGS)
+
+ha:
+	make install-ha stop start-ha
+	ssh $(GUEST) "cd hadoop-conf ; export JAVA_HOME=/usr/lib/jvm/java-openjdk; make -e stop bootstrap-guest-by-host format-zkfc start-zkfc-bg start-nn" &
 
 ha-config: ha-hdfs-site.xml
 
@@ -64,7 +85,7 @@ envquiet:
 
 services.keytab:
 	scp principals.sh $(DNS_SERVER):
-	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER)"
+	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER_HOST)"
 	scp $(DNS_SERVER):services.keytab .
 
 install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs
@@ -109,7 +130,9 @@ stop-nodemanager:
 stop-zookeeper:
 	-sh stop.sh zookeeper
 
-start-hdfs: stop-hdfs initialize-hdfs start-namenode start-secondary-namenode start-datanode
+start-hdfs: stop-hdfs initialize-hdfs start-namenode-bg start-datanode-bg
+
+start-hdfs-ha: stop-hdfs start-jn-b initialize-hdfs start-zookeeper start-namenode-bg format-zkfc start-zkfc-bg start-datanode-bg
 
 initialize-hdfs:
 	-rm -rf /tmp/logs
@@ -122,6 +145,9 @@ format-nn: initialize-hdfs
 format-dn:
 	rm -rf /tmp/hadoop-data/dfs/data
 
+/tmp/hadoop-data/dfs/name:
+	-mkdir $@
+
 start-nn: start-namenode
 
 format-and-start-master:
@@ -129,10 +155,12 @@ format-and-start-master:
 
 start-standby-nn-on-host: bootstrap-host-by-guest start-nn
 
+# run this on guest, not host:
 start-standby-nn-on-guest: bootstrap-guest-by-host start-nn
 
 format-and-start-jn: format-jn start-jn
 
+# run this on guest, not host:
 bootstrap-guest-by-host:
 	-rm -rf /tmp/hadoop-data/dfs/name
 	mkdir -p /tmp/hadoop-data/dfs
@@ -156,9 +184,8 @@ start-namenode: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	tail -f $(HADOOP_RUNTIME)/logs/namenode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
 
-start-nn-b: services.keytab /tmp/hadoop-data/dfs/name
+start-namenode-bg: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
-
 
 restart-zkfc: stop-zkfc start-zkfc
 
@@ -168,14 +195,16 @@ start-zkfc: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log && tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
+start-zkfc-bg: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
+	touch $(HADOOP_RUNTIME)/logs/zkfc.log
+	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc &
+
 stop-zkfc:
 	-kill `jps | grep DFSZKFailoverController | awk '{print $$1}'`
 
 format-zkfc: services.keytab /tmp/hadoop-data/dfs/name
 	$(HADOOP_RUNTIME)/bin/hdfs zkfc -formatZK
-
-start-zk: services.keytab /tmp/hadoop-data/dfs/name
-	~/zookeeper/bin/zkServer.sh start-foreground
 
 format-nn-master:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
@@ -195,16 +224,16 @@ format-and-start-jn: format-jn start-jn
 
 format-jn:
 	rm -rf /tmp/hadoop/dfs/jn
-	mkdir /tmp/hadoop/dfs/jn
+	mkdir -p /tmp/hadoop/dfs/jn
 	find /tmp/hadoop/dfs/jn -ls
 	rm -rf /tmp/hadoop-data/dfs/jn
-	mkdir /tmp/hadoop-data/dfs/jn
+	mkdir -p /tmp/hadoop-data/dfs/jn
 	find /tmp/hadoop-data/dfs/jn -ls
 	rm -rf /tmp/hadoop/dfs/journalnode
-	mkdir /tmp/hadoop/dfs/journalnode
+	mkdir -p /tmp/hadoop/dfs/journalnode
 	find /tmp/hadoop/dfs/journalnode -ls
 	rm -rf /tmp/hadoop/dfs/journalnode
-	mkdir /tmp/hadoop/dfs/journalnode
+	mkdir -p /tmp/hadoop/dfs/journalnode
 	find /tmp/hadoop/dfs/journalnode -ls
 
 #adding '/tmp/hadoop/dfs/name' as a dep causes a cycle because it will try to 
@@ -214,7 +243,7 @@ start-jn: services.keytab $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/journalnode.log
 	echo "logging to: $(HADOOP_RUNTIME)/logs/journalnode.log"
 	tail -f $(HADOOP_RUNTIME)/logs/journalnode.log &
-	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode &
 
 start-jn-b: services.keytab
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=journalnode.log $(HADOOP_RUNTIME)/bin/hdfs journalnode &
@@ -237,7 +266,7 @@ start-datanode: services.keytab  $(HADOOP_RUNTIME)/logs
 	tail -f $(HADOOP_RUNTIME)/logs/datanode.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode
 
-start-dn-b: services.keytab
+start-datanode-bg: services.keytab $(HADOOP_RUNTIME)/logs
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=datanode.log $(HADOOP_RUNTIME)/bin/hdfs datanode &
 
 stop-datanode:
@@ -245,14 +274,26 @@ stop-datanode:
 
 start-yarn: stop-yarn start-resourcemanager start-nodemanager
 
+restart-yarn: start-yarn
+
 start-resourcemanager:
 	YARN_ROOT_LOGGER=INFO,DRFA YARN_LOGFILE=resourcemanager.log $(HADOOP_RUNTIME)/bin/yarn resourcemanager &
 
 start-nodemanager:
 	YARN_ROOT_LOGGER=INFO,DRFA YARN_LOGFILE=nodemanager.log $(HADOOP_RUNTIME)/bin/yarn nodemanager &
 
+restart-zookeeper: stop-zookeeper start-zookeeper
+
+format-zk: stop-zookeeper
+	rm -rf /tmp/zookeeper/*
+
+start-zk: services.keytab /tmp/hadoop-data/dfs/name
+	~/zookeeper/bin/zkServer.sh start-foreground
+
 start-zookeeper:
-	$(ZOOKEEPER_HOME)/bin/zkServer.sh start
+	SERVER_JVMFLAGS="-Dzookeeper.kerberos.removeHostFromPrincipal=true -Dzookeeper.kerberos.removeRealmFromPrincipal=true   -Djava.security.krb5.conf=$(HOME)/hadoop-conf/krb5.conf -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun -Djava.security.auth.login.config=/Users/ekoontz/hbase-runtime/conf/jaas.conf" ZOO_LOG_DIR=/tmp $(ZOOKEEPER_HOME)/bin/zkServer.sh start
+
+restart-zookeeper: stop-zookeeper start-zookeeper
 
 restart: stop start
 	echo
@@ -260,6 +301,9 @@ restart: stop start
 restart-hdfs: stop-hdfs start-hdfs
 
 start: sync services.keytab start-hdfs start-yarn start-zookeeper
+	jps
+
+start-ha: sync services.keytab format-jn start-hdfs-ha start-yarn start-zookeeper
 	jps
 
 start2: manualsync services.keytab start-hdfs start-yarn start-zookeeper
@@ -285,10 +329,17 @@ logout:
 login: logout
 	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kdestroy; kinit `whoami`@$(REALM))
 
+hdfs-login: hdfsuser
+
 # uses keytab authentication.
 hdfsuser: services.keytab
 	-kdestroy
 	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hdfs/$(MASTER_HOST)@$(REALM)
+
+hbase-login: services.keytab
+	-kdestroy
+	export KRB5_CONFIG=$(KRB5_CONFIG); kinit -k -t services.keytab hbase/$(MASTER_HOST)@$(REALM)
+
 
 rmr-tmp: hdfsuser
 	-$(LOG) $(HADOOP_RUNTIME)/bin/hadoop fs -rm -r hdfs://$(MASTER):8020/tmp
@@ -332,7 +383,7 @@ permissions-ha: rmr-tmp-ha
 
 #print some diagnostics
 report:
-	export CLUSTER=$(CLUSTER) MASTER=$(MASTER) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER) HADOOP_RUNTIME=$(HADOOP_RUNTIME); make -s -e report2
+	export CLUSTER=$(CLUSTER) MASTER=$(MASTER_HOST) REALM=$(REALM) DNS_SERVER=$(DNS_SERVER) HADOOP_RUNTIME=$(HADOOP_RUNTIME); make -s -e report2
 
 report2:
 	echo " HOSTS:"
@@ -462,3 +513,7 @@ terms: stop stop-on-guest sync touch-logs touch-logs-on-guest terms.rb
 	./terms.rb eugene.yaml
 	./terms.scpt
 
+hbase-setup: hdfs-login
+	$(HADOOP_RUNTIME)/bin/hadoop fs -mkdir -p /hbase
+	$(HADOOP_RUNTIME)/bin/hadoop fs -chown hbase /hbase
+	$(HADOOP_RUNTIME)/bin/hadoop fs -chmod 777 /tmp/hadoop-yarn

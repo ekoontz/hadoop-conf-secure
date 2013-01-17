@@ -41,9 +41,9 @@ write_term_script "terms.scpt", [
                                  [conf['nn2'], conf['zkfc2log'], "{50,2725,1200,780}", "zkfc2",
                                   "ssh #{nn2} '. .bash_profile && cd hadoop-conf && make stop && make clean-logs && make start-zkfc'"],
 
+                                 #'sleep 20' to give active NN time to startup.
                                  [conf['nn2'], conf['nn2log'],   "{50,2275,1200,660}", "nn2",
                                   "ssh #{nn2} '. .bash_profile && cd hadoop-conf && sleep 20 && make start-standby-nn-on-guest'"]
-
 
                                 ]
 

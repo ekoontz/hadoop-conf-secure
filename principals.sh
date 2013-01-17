@@ -86,6 +86,13 @@ echo "addprinc -randkey HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "ktadd -k `pwd`/$SERVICE_KEYTAB HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
+
+#1.7 hbase
+echo "delprinc -force hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -k `pwd`/$SERVICE_KEYTAB hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+
 sudo chown $NORMAL_USER `pwd`/$SERVICE_KEYTAB
 
 #2. users
