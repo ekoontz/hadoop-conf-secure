@@ -287,8 +287,11 @@ restart-zookeeper: stop-zookeeper start-zookeeper
 format-zk: stop-zookeeper
 	rm -rf /tmp/zookeeper/*
 
-start-zk: services.keytab /tmp/hadoop-data/dfs/name
+start-zk-fg: services.keytab /tmp/hadoop-data/dfs/name
 	~/zookeeper/bin/zkServer.sh start-foreground
+
+start-zk: services.keytab /tmp/hadoop-data/dfs/name
+	~/zookeeper/bin/zkServer.sh start
 
 start-zookeeper:
 	SERVER_JVMFLAGS="-Dzookeeper.kerberos.removeHostFromPrincipal=true -Dzookeeper.kerberos.removeRealmFromPrincipal=true   -Djava.security.krb5.conf=$(HOME)/hadoop-conf/krb5.conf -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun -Djava.security.auth.login.config=/Users/ekoontz/hbase-runtime/conf/jaas.conf" ZOO_LOG_DIR=/tmp $(ZOOKEEPER_HOME)/bin/zkServer.sh start
