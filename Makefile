@@ -132,7 +132,9 @@ stop-zookeeper:
 
 start-hdfs: stop-hdfs initialize-hdfs start-namenode-bg start-datanode-bg
 
-start-hdfs-ha: stop-hdfs start-jn-b initialize-hdfs start-zookeeper start-namenode-bg format-zkfc start-zkfc-bg start-datanode-bg
+restart-hdfs-ha: stop-hdfs start-hdfs-ha
+
+start-hdfs-ha: start-jn-b initialize-hdfs start-zookeeper start-namenode-bg format-zkfc start-zkfc-bg start-datanode-bg
 
 initialize-hdfs:
 	-rm -rf /tmp/logs
@@ -185,7 +187,7 @@ start-namenode: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode
 
 start-namenode-bg: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
-	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
+	$(NAMENODE_OPTS) HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=namenode.log $(HADOOP_RUNTIME)/bin/hdfs namenode &
 
 restart-zkfc: stop-zkfc start-zkfc
 
