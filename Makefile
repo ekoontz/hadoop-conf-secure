@@ -71,7 +71,8 @@ ha-core-site.xml: templates/ha-core-site.xsl core-site.xml
 		 --stringparam master 'eugenes-macbook-pro.local' \
 		 --stringparam nn_failover '$(GUEST)' \
 		 --stringparam jn1 'eugenes-macbook-pro.local' \
-		 --stringparam zk1 'eugenes-macbook-pro.local' $^ | xmllint --format - > $@
+		 --stringparam zk1 'eugenes-macbook-pro.local' \
+		 --stringparam ldap_server '$(GUEST)' $^ | xmllint --format - > $@
 
 printenv:
 	make -s -e envquiet
