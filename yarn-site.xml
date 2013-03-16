@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!-- Put site-specific property overrides in this file. -->
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.delete.debug-delay-sec</name>
+    <value>600</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce.shuffle</value>
+  </property>
+  <property>
+    <name>yarn.application.classpath</name>
+    <value>/Users/ekoontz/hadoop-runtime/etc/hadoop:/Users/ekoontz/hadoop-runtime/share/hadoop/common/*:/Users/ekoontz/hadoop-runtime/share/hadoop/common/lib/*:/Users/ekoontz/hadoop-runtime/share/hadoop/hdfs/*:/Users/ekoontz/hadoop-runtime/share/hadoop/hdfs/lib/*:/Users/ekoontz/hadoop-runtime/share/hadoop/mapreduce/*:/Users/ekoontz/hadoop-runtime/share/hadoop/mapreduce/lib/*:/Users/ekoontz/giraph/giraph-core/target/munged/classes:/Users/ekoontz/giraph/giraph-core/target/classes:/Users/ekoontz/hadoop-runtime/share/hadoop/yarn/*:/Users/ekoontz/.m2/repository/org/json/json/20090211/json-20090211.jar:/Users/ekoontz/.m2/repository/org/json/json/20090211/json-20090211.jar:/Users//Users/ekoontz/.m2/repository/net/iharder/base64/2.3.8/base64-2.3.8.jar:/Users/ekoontz/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.scheduler.address</name>
+    <value>Eugenes-MacBook-Pro.local</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.resource-tracker.address</name>
+    <value>Eugenes-MacBook-Pro.local:8031</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.address</name>
+    <value>Eugenes-MacBook-Pro.local:8032</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.admin.address</name>
+    <value>Eugenes-MacBook-Pro.local:8033</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>Eugenes-MacBook-Pro.local:8088</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.admin-env</name>
+    <value>MALLOC_ARENA_MAX=$MALLOC_ARENA_MAX, JAVA_LIBRARY_PATH=$JAVA_LIBRARY_PATH, LD_LIBRARY_PATH=$JAVA_LIBRARY_PATH, FOO=42, KRB5_CONFIG=/Users/ekoontz/hadoop-conf/krb5.conf</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.keytab</name>
+    <value>/Users/ekoontz/hadoop-conf/services.keytab</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.principal</name>
+    <value>yarn/_HOST@EXAMPLE.COM</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.keytab</name>
+    <value>/Users/ekoontz/hadoop-conf/services.keytab</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.principal</name>
+    <value>yarn/_HOST@EXAMPLE.COM</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.local-dirs</name>
+    <value>/tmp/nm-local-dir</value>
+  </property>
+  <property>
+    <name>mapreduce.map.log.level</name>
+    <value>DEBUG</value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.log.level</name>
+    <value>DEBUG</value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.command-opts</name>
+    <value>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5011 -Dfoo=44 -Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Djava.security.krb5.conf=/Users/ekoontz/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+  </property>
+  <property>
+    <name>mapreduce.admin.map.child.java.opts</name>
+    <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+  </property>
+  <property>
+    <name>mapreduce.map.java.opts</name>
+    <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.java.opts</name>
+    <value>-Dhadoop.root.logger=INFO,CLA -Dzookeeper.root.logger=INFO,CLA -Dfoo=45 -Djava.security.krb5.conf=/Users/ekoontz/hadoop-conf/krb5.conf -Dsun.security.krb5.debug=true  -Dsun.net.spi.nameservice.nameservers=172.16.175.3 -Dsun.net.spi.nameservice.provider.1=dns,sun</value>
+  </property>
+</configuration>
