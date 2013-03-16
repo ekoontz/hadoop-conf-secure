@@ -25,7 +25,7 @@ touch-logs touch-logs-on-guest start-ha ha start-hdfs-ha start-yarn stop-yarn re
 # ^^ TODO: add test-zookeeper target and add it to .PHONY above
 
 # config files that are rewritten by rewrite-config.xsl.
-CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml ha-hdfs-site.xml ha-core-site.xml
+CONFIGS=core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml ha-hdfs-site.xml ha-core-site.xml hadoop-policy.xml
 HA_CONFIGS=hdfs-site-ha.xml
 CLUSTER=ekoontz1
 MASTER=$(CLUSTER)
