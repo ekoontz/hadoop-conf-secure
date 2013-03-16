@@ -1,7 +1,10 @@
+# with YARN:
+#
+# make stop sync format-zk prep-jn-dir start-hdfs-ha hdfs-test start-yarn mapreduce-test
 #
 # known to work:
 #
-# make stop sync format-zk format-jn start-hdfs-ha hdfs-test 
+# make stop sync format-zk prep-jn-dir start-hdfs-ha hdfs-test 
 #  (type password)
 #  then:
 # make start-yarn test-mapreduce
@@ -161,7 +164,7 @@ start-standby-nn-on-host: bootstrap-host-by-guest start-nn
 # run this on guest, not host:
 start-standby-nn-on-guest: bootstrap-guest-by-host start-nn
 
-format-and-start-jn: format-jn start-jn
+format-and-start-jn: prep-jn-dir start-jn
 
 # run this on guest, not host:
 bootstrap-guest-by-host:
@@ -223,9 +226,9 @@ stop-namenode:
 init-jn:
 	$(HADOOP_RUNTIME)/bin/hdfs namenode -initializeSharedEdits
 
-format-and-start-jn: format-jn start-jn
+format-and-start-jn: prep-jn-dir start-jn
 
-format-jn:
+prep-jn-dir:
 	rm -rf /tmp/hadoop/dfs/jn
 	mkdir -p /tmp/hadoop/dfs/jn
 	find /tmp/hadoop/dfs/jn -ls
@@ -309,7 +312,7 @@ restart-hdfs: stop-hdfs start-hdfs
 start: sync services.keytab start-hdfs start-yarn start-zookeeper
 	jps
 
-start-ha: sync services.keytab format-jn start-hdfs-ha start-yarn start-zookeeper
+start-ha: sync services.keytab prep-jn-dir start-hdfs-ha start-yarn start-zookeeper
 	jps
 
 start2: manualsync services.keytab start-hdfs start-yarn start-zookeeper
@@ -332,6 +335,8 @@ logout:
 	-kdestroy
 
 # check for login with klist: if it fails, login to kerberos with kinit.
+#TODO: use keytab rather than interactive login so that tests don't depend on
+#getting password from keyboard.
 login: logout
 	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kdestroy; kinit `whoami`@$(REALM))
 
