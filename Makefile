@@ -20,8 +20,8 @@
 
 .PHONY=all clean install start restart start-hdfs start-zookeeper test test-hdfs test-mapreduce \
 stop principals printenv start-namenode start-namenode-bg start-datanode start-datanode-bg initialize-hdfs \
-envquiet login relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 sync runtest \
-manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort test-terasort2 \
+envquiet login login-from-keytab relogin logout hdfsuser stop stop-hdfs stop-yarn stop-zookeeper report report2 \
+sync runtest manualsync start-resourcemanager start-nodemanager restart-hdfs test-terasort test-terasort2 \
 stop-secondarynamenode rm-hadoop-runtime-symlink ha-install start-jn build clean-logs terms stop-on-guest \
 touch-logs touch-logs-on-guest start-ha ha start-hdfs-ha start-yarn stop-yarn restart-yarn hdfs-login
 
@@ -91,6 +91,11 @@ services.keytab:
 	scp principals.sh $(DNS_SERVER):
 	ssh -t $(DNS_SERVER) "sh principals.sh $(MASTER_HOST)"
 	scp $(DNS_SERVER):services.keytab .
+
+user.keytab:
+	scp user-keytab.sh $(DNS_SERVER):
+	ssh -t $(DNS_SERVER) "sh user-keytab.sh `whoami`"
+	scp $(DNS_SERVER):`whoami`.keytab $@
 
 install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
@@ -328,17 +333,18 @@ sync:
 	ssh -t $(DNS_SERVER) "sudo service ntpdate restart"
 	ssh -t $(DNS_SERVER) "sudo service krb5kdc restart"
 
-# uses password authentication:
-relogin: logout login
+relogin: logout login-from-keytab
 
 logout:
 	-kdestroy
 
 # check for login with klist: if it fails, login to kerberos with kinit.
-#TODO: use keytab rather than interactive login so that tests don't depend on
-#getting password from keyboard.
 login: logout
 	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kdestroy; kinit `whoami`@$(REALM))
+
+login-from-keytab: logout user.keytab
+	klist | grep `whoami` 2>/dev/null || (export KRB5_CONFIG=$(KRB5_CONFIG); kdestroy; kinit -k -t user.keytab `whoami`@$(REALM))
+
 
 hdfs-login: hdfsuser
 
@@ -518,7 +524,6 @@ touch-logs:
 
 touch-logs-on-guest:
 	ssh $(GUEST) "cd hadoop-conf && make touch-logs"
-
 
 terms: stop stop-on-guest sync touch-logs touch-logs-on-guest terms.rb
 	./terms.rb eugene.yaml
