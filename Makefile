@@ -168,6 +168,11 @@ start-zkfc: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
 	touch $(HADOOP_RUNTIME)/logs/zkfc.log && tail -f $(HADOOP_RUNTIME)/logs/zkfc.log &
 	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc
 
+start-zkfc-bg: services.keytab /tmp/hadoop-data/dfs/name $(HADOOP_RUNTIME)/logs
+	touch $(HADOOP_RUNTIME)/logs/zkfc.log
+	echo "logging to $(HADOOP_RUNTIME)/logs/zkfc.log"
+	HADOOP_ROOT_LOGGER=INFO,DRFA HADOOP_LOGFILE=zkfc.log $(HADOOP_RUNTIME)/bin/hdfs zkfc &
+
 stop-zkfc:
 	-kill `jps | grep DFSZKFailoverController | awk '{print $$1}'`
 
