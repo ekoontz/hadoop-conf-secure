@@ -45,46 +45,53 @@ echo "modprinc -maxrenewlife 7days krbtgt/$REALM" | $KADMIN_LOCAL
 #1.1. host
 echo "delprinc -force host/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey host/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB host/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB host/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days host/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.2. zookeeper
 echo "delprinc -force zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days zookeeper/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.3. hdfs
 echo "delprinc -force hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days hdfs/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.4. mapred
 echo "delprinc -force mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days mapred/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 #1.4.5 historymanager
 echo "delprinc -force jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days jt/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 
 #1.5. yarn
 echo "delprinc -force yarn/$INSTANCE" | $KADMIN_LOCAL
 echo "addprinc -randkey yarn/$INSTANCE" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB yarn/$INSTANCE" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB yarn/$INSTANCE" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days yarn/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 
 #1.6 http
 echo "delprinc -force HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "addprinc -randkey HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
-echo "ktadd -k `pwd`/$SERVICE_KEYTAB HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
 echo "modprinc -maxrenewlife 7days HTTP/$INSTANCE@$REALM" | $KADMIN_LOCAL
+
+
+#1.7 hbase
+echo "delprinc -force hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "addprinc -randkey hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/$SERVICE_KEYTAB hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
+echo "modprinc -maxrenewlife 7days hbase/$INSTANCE@$REALM" | $KADMIN_LOCAL
 
 sudo chown $NORMAL_USER `pwd`/$SERVICE_KEYTAB
 
@@ -119,7 +126,7 @@ echo "modprinc -maxrenewlife 7days `whoami`@$REALM" | $KADMIN_LOCAL
 # only uncomment this if you want to use keytabs with client (rather
 # than password).
 #rm -f `pwd`/`whoami`.keytab
-#echo "ktadd -k `pwd`/`whoami`.keytab `whoami`/@$REALM" | $KADMIN_LOCAL
+#echo "ktadd -e \"DES-CBC-CRC:NORMAL\" -k `pwd`/`whoami`.keytab `whoami`/@$REALM" | $KADMIN_LOCAL
 #sudo chown $NORMAL_USER `pwd`/`whoami`.keytab
 
 
