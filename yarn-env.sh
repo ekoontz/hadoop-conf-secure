@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-if [ ! -f hadoop-conf.sh ]; then
+if [ ! -f $HOME/hadoop-runtime/etc/hadoop/hadoop-conf.sh ]; then
     echo "Error: no hadoop-conf.sh file found."
     exit 1
 else
-    source hadoop-conf.sh
+    source $HOME/hadoop-runtime/etc/hadoop/hadoop-conf.sh
 fi
-source hadoop-conf.sh
 
 export YARN_LOG_DIR=/tmp
 export HADOOP_ROOT_LOGGER="INFO,console"
