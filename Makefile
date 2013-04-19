@@ -97,8 +97,12 @@ user.keytab:
 	ssh -t $(DNS_SERVER) "sh user-keytab.sh `whoami`"
 	scp $(DNS_SERVER):`whoami`.keytab $@
 
-install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs
+install: all rm-hadoop-runtime-symlink ~/hadoop-runtime services.keytab ~/hadoop-runtime/logs install_zoo_cfg
 	cp $(CONFIGS) $(OTHER_CONFIGS) ~/hadoop-runtime/etc/hadoop
+
+install_zoo_cfg: zoo.cfg
+	-mkdir -p ~/zookeeper/conf
+	cp zoo.cfg ~/zookeeper/conf
 
 install-ha: ha-install
 
